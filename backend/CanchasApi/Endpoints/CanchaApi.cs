@@ -172,7 +172,7 @@ namespace CanchasApi.Endpoints
                 db.Canchas.Remove(cancha);
                 await db.SaveChangesAsync();
                 return Results.NoContent();
-            }).RequireAuthorization(p => p.RequireRole("Trabajador", "Administrador"));
+            }).RequireAuthorization(p => p.RequireRole("Administrador"));
         }
 
         public record CanchaCreateRequest(int Numero, int SedeId, int TipoCanchaId, string? Estado);
