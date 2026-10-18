@@ -4,10 +4,12 @@ using CanchasApi.Models;
 using CanchasApi.Repositories;
 using CanchasApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 //cargamos todo lo referente los jwt
@@ -26,6 +28,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 ValidateAudience = true,
                 ValidateIssuerSigningKey = true,
                 ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromMinutes(1),
                 ValidIssuer = jwtIssuer,
                 ValidAudience = jwtAudince,
                 IssuerSigningKey = new SymmetricSecurityKey(
@@ -65,6 +68,25 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Rate limiting para mitigar ataques de fuerza bruta en login (configurable para tests)
+var loginPermitLimit = int.TryParse(builder.Configuration["RateLimiting:LoginPermitLimit"], out var limit) ? limit : 5;
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("login", httpContext =>
+    {
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = loginPermitLimit,
+            Window = TimeSpan.FromMinutes(1),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 0
+        });
+    });
+});
+
 var app = builder.Build();
 
 // Middleware de cabeceras de seguridad HTTP
@@ -95,6 +117,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseRequestLogging(); // middleware propio: registra método, ruta, status y duración
 app.UseCors("FrontendPolicy"); // CORS debe ejecutarse antes de la autenticación
+app.UseRateLimiter(); // Aplica limitación de tasa antes de autenticación/endpoints
 app.UseAuthentication(); // ¿quién es?
 app.UseAuthorization(); // ¿qué puede hacer?
 // Endpoint para comprobar conexión a la base de datos
