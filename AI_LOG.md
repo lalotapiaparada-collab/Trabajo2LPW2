@@ -101,6 +101,23 @@
 - **Descartado:** No se utilizaron selectores frágiles por clases CSS ni llamadas directas al DOM privado de React.
 - **Comprendido y explicable:** Sí.
 
+---
+
+## Entrada 9 – Fase 9: Evidencias, informe técnico y bitácora
+- **Fecha/hora:** 2026-10-18 19:54
+- **Prompt usado:** Con todo el código terminado, genera los documentos de la Fase 9: docs/MATRIZ_RIESGOS.md (usa la tabla propuesta y completa la columna "dónde aparece" con archivos y líneas reales), docs/INFORME_TECNICO.md, ambos README.md y la carpeta docs/evidencia/ con los reportes que se puedan generar por comandos. No inventes capturas: lista las que yo debo tomar manualmente y con qué pasos.
+- **Resultado:** Elaboración de la suite completa de documentación técnica y evidencias:
+  1. Actualización de `docs/MATRIZ_RIESGOS.md` referenciando archivos y líneas de código exactas de mitigación para 8 riesgos OWASP (XSS, robo de token, consumo inseguro API10, dependencias vulnerables, BFLA API5, rate limiting API4, configuración insegura API8, inyección).
+  2. Redacción de `docs/INFORME_TECNICO.md` detallando arquitectura monolito/SPA, estado del servidor vs estado de cliente (TanStack Query + AuthContext), justificación de `sessionStorage` frente a cookies y `localStorage`, demostración de por qué CSRF no aplica a APIs con Bearer token, y resumen de accesibilidad WCAG 2.2 AA.
+  3. Redacción de `README.md` (raíz) y `frontend/README.md` con instrucciones "Clone & Run" sin ajustes manuales, certificados HTTPS, user-secrets, DevSeeder y comandos de pruebas.
+  4. Creación de `docs/evidencia/GUIA_CAPTURAS.md` con el instructivo paso a paso para la captura manual de evidencias (401, 403, CORS, XSS, 429, cabeceras, Lighthouse y resoluciones responsivas).
+  5. Creación de `docs/evidencia/13-revision-teclado-lector.md` con lista de chequeo de navegación por teclado y lector de pantalla NVDA.
+- **Aceptado:** Estructura modular, trazabilidad de código con enlaces de repositorio reales, documentación académica rigurosa y checklist de evidencias.
+- **Corregido:** Se aseguraron rutas y comandos multiplataforma con explicaciones para PowerShell y bash en Windows.
+- **Descartado:** No se incluyeron imágenes ficticias; se proveyó la guía explícita para la obtención de capturas reales.
+- **Comprendido y explicable:** Sí.
+
+
 
 
 
