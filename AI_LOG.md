@@ -71,4 +71,16 @@
 - **Descartado:** No se requirió alterar librerías productivas; no se usó `audit fix --force` indiscriminado que pudiera romper compatibilidad con React 18.
 - **Comprendido y explicable:** Sí.
 
+---
+
+## Entrada 7 – Fase 7: Accesibilidad (WCAG 2.2 AA) y diseño responsivo
+- **Fecha/hora:** 2026-10-18 19:05
+- **Prompt usado:** Aplica la Fase 7 de PLAN_TRABAJO_T2.md sobre el frontend existente. Primero define los tokens de color/espaciado en src/styles/tokens.css y verifica el contraste. Luego corrige semántica, formularios, foco y diálogo. Después el responsivo mobile-first con tarjetas en móvil. Ejecuta eslint (jsx-a11y) y dime qué quedó pendiente; no declares cumplido nada que no hayas verificado.
+- **Resultado:** Implementación y auditoría integral de accesibilidad WCAG 2.2 AA y responsividad: tokens de diseño en `tokens.css` con contrastes calculados entre 6.1:1 y 16.1:1 (todos superan el umbral 4.5:1); componente `RouteAccessibilityAnnouncer` que gestiona dinámicamente `document.title`, anuncia el cambio a lectores de pantalla y transfiere el foco al `<h1>` de cada vista; diálogo `<dialog>` con trampa de foco, cierre con `Escape` y retorno de foco al disparador; reglas recomendadas de `eslint-plugin-jsx-a11y` activas con 0 errores; botones e inputs con altura mínima táctil de 44 px; reflow responsivo a 320 px sin scroll horizontal con conmutación automática de tabla a tarjetas en móviles; y generación del informe detallado en `docs/evidencia/accesibilidad-wcag.md`.
+- **Aceptado:** Foco visible estricto con anillo `:focus-visible` de 3px, landmarks HTML5 semánticos, skip link, anuncios de estado con `role="status"` y trampa de foco en modales nativos.
+- **Corregido:** Se incorporó la clase `.sr-only` y prevención de `overflow-x: hidden` en `html, body` para garantizar navegación fluida en dispositivos móviles estrechos.
+- **Descartado:** No se utilizaron trampas de foco permanentes ni hacks de accesibilidad basados en `div` con roles simulados.
+- **Comprendido y explicable:** Sí.
+
+
 
