@@ -1,0 +1,32 @@
+# Compilación y temporales de .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Node y Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Variables de entorno y secretos
+.env
+.env.*
+!.env.example
+*.pfx
+*.pem
+*.cer
+
+# Reportes y pruebas
+coverage/
+playwright-report/
+test-results/
+
+# Sistema operativo
+Thumbs.db
+Desktop.ini
+.DS_Store
