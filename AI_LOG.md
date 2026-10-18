@@ -37,3 +37,14 @@
 - **Corregido:** Se detectó un bug real donde `AddJwtBearer` y `AddRateLimiter` capturaban configuraciones fijas antes de que `CustomWebApplicationFactory` inyectara la configuración de tests, provocando rechazo 401 por clave JWT desincronizada; se corrigió evaluando `builder.Configuration` dinámicamente dentro de los callbacks de opciones.
 - **Descartado:** No se alteraron los contratos de los endpoints ni las migraciones de base de datos.
 - **Comprendido y explicable:** Sí.
+
+---
+
+## Entrada 4 – Fase 4: Frontend: proyecto base, capa HTTP y autenticación
+- **Fecha/hora:** 2026-10-18 18:30
+- **Prompt usado:** Crea frontend/ con Vite + React + TypeScript siguiendo la estructura y decisiones de PLAN_TRABAJO_T2.md (secciones 3 y 5, Fase 4). Empieza solo por: scaffold, .env.example, tipos, httpClient con interceptores, servicios y AuthContext + LoginPage + ProtectedRoute/RoleGuard. Comenta el porqué de cada decisión de seguridad (dónde se guarda el token, qué hace el 401). Código simple y legible, un commit por tarea. No avances al CRUD todavía.
+- **Resultado:** Inicialización del proyecto frontend con Vite, React 18 y TypeScript; configuración de HTTPS en puerto 5173 (`basicSsl`); definición de tipos y esquemas Zod en `types/`; implementación de cliente HTTP Axios con interceptor de Bearer token y normalización de errores (`ApiError`); servicios tipados para Auth, Canchas, Tipos de Cancha y Sedes; `AuthContext` con persistencia en `sessionStorage` y auto-logout por expiración de JWT; pantalla de `LoginPage` accesible con React Hook Form, Zod y control de rate limiting 429; `ProtectedRoute` y `RoleGuard` para control de rutas por rol; páginas 403 y 404; y `Layout` semántico con skip link.
+- **Aceptado:** Almacenamiento del token en `sessionStorage` (limpieza automática al cerrar pestaña o expirar), validación Zod en respuestas para mitigar OWASP API10, y guards de roles en UI.
+- **Corregido:** Ajuste de importaciones TypeScript (`import type`) para evitar advertencias de Rollup durante el empaquetado de producción.
+- **Descartado:** No se utilizó TailwindCSS ni frameworks CSS pesados, implementando CSS puro con variables y tokens WCAG 2.2 AA.
+- **Comprendido y explicable:** Sí.
