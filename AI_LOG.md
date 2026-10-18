@@ -26,3 +26,14 @@
 - **Corregido:** Se aseguró que la CSP no bloqueara la documentación interactiva Scalar/OpenAPI durante el desarrollo mediante exclusión condicional.
 - **Descartado:** No se agregaron librerías externas innecesarias, manteniéndose exclusivamente dentro del SDK base de .NET 10.
 - **Comprendido y explicable:** Sí.
+
+---
+
+## Entrada 3 – Fase 3: Pruebas de integración del backend
+- **Fecha/hora:** 2026-10-18 18:08
+- **Prompt usado:** Agrega pruebas xUnit al proyecto CanchasApi.Tests que cubran los casos listados en la Fase 3. Usa la factory existente. Cada test debe tener un nombre en español que describa el caso y un solo Assert principal. No toques el código de producción salvo que un test revele un bug real; si pasa, explícame el bug antes de corregirlo.
+- **Resultado:** Creación de 12 nuevas pruebas de integración en `CanchasAutorizacionTests.cs` y `SeguridadTests.cs`, alcanzando 19 pruebas en total en verde. Se cubrieron casos de: 401 sin token, 403 con Cliente en creación de cancha, 201 con Trabajador, 403 con Trabajador en eliminación, 204 con Administrador; 401 en login con clave incorrecta; preflight CORS con origen permitido y no permitido; 429 TooManyRequests al exceder límite de login; presencia de cabeceras de seguridad; validación de largo de clave en registro; y re-verificación de control de acceso BOLA en usuarios ajenos (403). Salida persistida en `docs/evidencia/backend-tests.txt`.
+- **Aceptado:** Estructura de pruebas con nombres descriptivos en español y aserción única por caso.
+- **Corregido:** Se detectó un bug real donde `AddJwtBearer` y `AddRateLimiter` capturaban configuraciones fijas antes de que `CustomWebApplicationFactory` inyectara la configuración de tests, provocando rechazo 401 por clave JWT desincronizada; se corrigió evaluando `builder.Configuration` dinámicamente dentro de los callbacks de opciones.
+- **Descartado:** No se alteraron los contratos de los endpoints ni las migraciones de base de datos.
+- **Comprendido y explicable:** Sí.
