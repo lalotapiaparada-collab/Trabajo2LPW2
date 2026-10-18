@@ -112,6 +112,22 @@ app.Use(async (context, next) =>
 
 if (!app.Environment.IsDevelopment())
 {
+    app.UseExceptionHandler(exceptionHandlerApp =>
+    {
+        exceptionHandlerApp.Run(async context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            context.Response.ContentType = "application/problem+json";
+            var problem = new
+            {
+                type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
+                title = "Error interno del servidor",
+                status = StatusCodes.Status500InternalServerError,
+                detail = "Ocurrió un error inesperado al procesar la solicitud."
+            };
+            await context.Response.WriteAsJsonAsync(problem);
+        });
+    });
     app.UseHsts();
 }
 
@@ -120,19 +136,25 @@ app.UseCors("FrontendPolicy"); // CORS debe ejecutarse antes de la autenticació
 app.UseRateLimiter(); // Aplica limitación de tasa antes de autenticación/endpoints
 app.UseAuthentication(); // ¿quién es?
 app.UseAuthorization(); // ¿qué puede hacer?
-// Endpoint para comprobar conexión a la base de datos
-app.MapGet("/health", async (ReservasCanchasDbContext db) =>
+
+// Endpoint para comprobar conexión a la base de datos (sin filtrar trazas internas)
+app.MapGet("/health", async (ReservasCanchasDbContext db, ILogger<Program> logger) =>
 {
     try
     {
         var canConnect = await db.Database.CanConnectAsync();
         if (canConnect)
             return Results.Ok(new { database = "connected" });
-        return Results.StatusCode(503);
+        return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
     }
     catch (Exception ex)
     {
-        return Results.Problem(detail: ex.Message, statusCode: 503);
+        logger.LogError(ex, "Error al comprobar la salud de la base de datos");
+        return Results.Problem(
+            detail: "No se pudo conectar con el servicio de base de datos.",
+            statusCode: StatusCodes.Status503ServiceUnavailable,
+            title: "Servicio no disponible"
+        );
     }
 });
 // Configure the HTTP request pipeline.
