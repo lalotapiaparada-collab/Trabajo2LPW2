@@ -10,6 +10,9 @@ import { AccessDeniedPage } from './routes/AccessDeniedPage';
 import { NotFoundPage } from './routes/NotFoundPage';
 
 import { CanchasListPage } from './features/canchas/CanchasListPage';
+import { CanchaDetailPage } from './features/canchas/CanchaDetailPage';
+import { CanchaFormPage } from './features/canchas/CanchaFormPage';
+import { TiposCanchaPage } from './features/tipos-cancha/TiposCanchaPage';
 
 // Instancia global de TanStack Query
 const queryClient = new QueryClient({
@@ -35,42 +38,13 @@ export const App: React.FC = () => {
               <Route element={<Layout />}>
                 {/* Listado de Canchas (Vista principal para todos los usuarios autenticados) */}
                 <Route path="/" element={<CanchasListPage />} />
-
-                <Route
-                  path="/canchas/:id"
-                  element={
-                    <div>
-                      <h1>Detalle de Cancha</h1>
-                    </div>
-                  }
-                />
+                <Route path="/canchas/:id" element={<CanchaDetailPage />} />
 
                 {/* Rutas de gestión restringidas a Trabajador y Administrador */}
                 <Route element={<RoleGuard rolesPermitidos={['Trabajador', 'Administrador']} />}>
-                  <Route
-                    path="/canchas/nueva"
-                    element={
-                      <div>
-                        <h1>Crear Nueva Cancha</h1>
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/canchas/:id/editar"
-                    element={
-                      <div>
-                        <h1>Editar Cancha</h1>
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/tipos-cancha"
-                    element={
-                      <div>
-                        <h1>Gestión de Tipos de Cancha</h1>
-                      </div>
-                    }
-                  />
+                  <Route path="/canchas/nueva" element={<CanchaFormPage />} />
+                  <Route path="/canchas/:id/editar" element={<CanchaFormPage />} />
+                  <Route path="/tipos-cancha" element={<TiposCanchaPage />} />
                 </Route>
               </Route>
             </Route>
