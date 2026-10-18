@@ -16,10 +16,5 @@ namespace CanchasApi.Services
         {
             return hasher.VerifyHashedPassword(usuario, usuario.PasswordHash, passwordIntento);
         }
-
-        public PasswordVerificationResult VerifyPassowrd(Usuario usuario, string passwordIntento)
-        {
-            return VerifyPassword(usuario, passwordIntento);
-        }
     }
 }
