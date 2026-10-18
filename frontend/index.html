@@ -1,10 +1,20 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <meta name="description" content="Sistema seguro y accesible para la administración y consulta de canchas deportivas." />
+    <!-- 
+      Content Security Policy (CSP):
+      Mitiga ataques XSS (Cross-Site Scripting) y exfiltración de datos no autorizada.
+      Restringe la conexión únicamente a 'self' y al endpoint seguro del backend (https://localhost:7269).
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; connect-src 'self' https://localhost:7269; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
+    />
+    <title>CanchasYa - Gestión y Reserva de Canchas Deportivas</title>
   </head>
   <body>
     <div id="root"></div>
