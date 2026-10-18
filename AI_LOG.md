@@ -117,6 +117,21 @@
 - **Descartado:** No se incluyeron imágenes ficticias; se proveyó la guía explícita para la obtención de capturas reales.
 - **Comprendido y explicable:** Sí.
 
+---
+
+## Entrada 10 – Fase 10: Exposición y preparación de defensa oral
+- **Fecha/hora:** 2026-10-18 19:56
+- **Prompt usado:** Crea docs/EXPOSICION.md con un guion paso a paso de la demo (sección Fase 10 del plan) y el contenido de 8-10 diapositivas en texto. Incluye, para cada paso de la demo, el comando o clic exacto y el resultado que debe verse. Agrega 10 preguntas probables del docente con respuestas cortas basadas en el código real del proyecto, indicando archivo y función donde se ve cada cosa.
+- **Resultado:** Elaboración completa de la guía de exposición y defensa oral en `docs/EXPOSICION.md`:
+  1. Estructura de 9 diapositivas cubriendo portada, arquitectura monorepo, manejo de estado cliente/servidor, matriz de riesgos OWASP, justificación técnica contra CSRF, modelo RBAC, accesibilidad WCAG 2.2 AA, estrategia de pruebas y conclusiones.
+  2. Guion paso a paso cronometrado para una demostración en vivo de 10 a 12 minutos con comandos curl y clics exactos: arquitectura, login como Cliente, inspección de token Bearer y sessionStorage en DevTools, petición sin token (401), acceso con rol insuficiente (403), neutralización de XSS, bloqueo CORS, rate limit de login (429), navegación solo por teclado y responsive a 320 px, y verificación de pruebas en verde.
+  3. Banco de 10 preguntas probables del docente con respuestas fundamentadas en archivos, líneas y funciones concretas del código fuente.
+- **Aceptado:** Guion preciso y reproducible, respuestas técnicas vinculadas a la implementación real y cobertura completa de los requerimientos de evaluación.
+- **Corregido:** Se adaptaron los comandos de terminal para compatibilidad tanto con PowerShell como con bash.
+- **Descartado:** No se utilizaron explicaciones abstractas o genéricas no aplicables al código del repositorio.
+- **Comprendido y explicable:** Sí.
+
+
 
 
 
