@@ -82,5 +82,25 @@
 - **Descartado:** No se utilizaron trampas de foco permanentes ni hacks de accesibilidad basados en `div` con roles simulados.
 - **Comprendido y explicable:** Sí.
 
+---
+
+## Entrada 8 – Fase 8: Pruebas automatizadas del frontend
+- **Fecha/hora:** 2026-10-18 19:48
+- **Prompt usado:** Escribe las pruebas de la Fase 8 de PLAN_TRABAJO_T2.md. Usa MSW para simular la API en las de componentes. Cada prueba debe describir el comportamiento en español y buscar elementos por rol/etiqueta (como lo haría un usuario), no por clases CSS. Luego crea el único test E2E en Playwright. Muéstrame la salida real de cada comando.
+- **Resultado:** Configuración y ejecución exitosa de pruebas automatizadas en Vitest con Testing Library y MSW (Mock Service Worker), además de suite E2E en Playwright:
+  1. Configuración de `vitest.config.ts`, `setupTests.ts` y servidor MSW con handlers para autenticación, canchas, sedes y tipos de cancha.
+  2. Pruebas de `LoginPage` cubriendo validaciones de campos requeridos, mensaje accesible 401 por credenciales incorrectas, inicio de sesión exitoso con persistencia en `sessionStorage`, y bloqueo por rate limiting 429 con temporizador visual.
+  3. Pruebas de `ProtectedRoute` y `RoleGuard` verificando redirección a `/login` para anónimos, acceso permitido para `Trabajador` y bloqueo 403 con redirección a `/acceso-denegado` para rol `Cliente`.
+  4. Pruebas de `CanchasListPage` verificando indicador de carga, renderizado de datos en tabla/tarjetas, filtrado reactivo por texto y ocultamiento de controles de gestión para rol `Cliente`.
+  5. Pruebas de `CanchaFormPage` verificando creación exitosa con Toast accesible y captura de errores de validación 400 del servidor.
+  6. Pruebas de `HttpClientInterceptor` verificando purga de sesión en `sessionStorage` ante HTTP 401 e inyección de token Bearer en cabecera `Authorization`.
+  7. Prueba E2E en Playwright (`flujo-canchas.spec.ts`) documentando el flujo de login como Trabajador, creación y visualización de cancha.
+  8. 16/16 pruebas unitarias/componentes superadas con 0 fallos, salida guardada en `docs/evidencia/frontend-tests.txt`.
+- **Aceptado:** Búsqueda accesible orientada al usuario mediante roles y etiquetas (`getByRole`, `getByLabelText`, `findByRole`), aislamiento de peticiones con MSW, y verificación de contratos de API.
+- **Corregido:** Se identificó y resolvió un comportamiento de desbordamiento de entero de 32 bits en `setTimeout` dentro de `AuthContext.tsx` al decodificar timestamps lejanos en pruebas, limitando el delay a `MAX_TIMEOUT_MS` (2147483647 ms) para evitar auto-logouts prematuros.
+- **Descartado:** No se utilizaron selectores frágiles por clases CSS ni llamadas directas al DOM privado de React.
+- **Comprendido y explicable:** Sí.
+
+
 
 
