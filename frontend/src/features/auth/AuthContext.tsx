@@ -70,14 +70,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setToken(storedToken);
             setUsuario(parsedUser.data);
 
-            // Programar cierre de sesión al expirar
+            // Programar cierre de sesión al expirar (con protección contra overflow de 32-bit de setTimeout)
+            const MAX_TIMEOUT_MS = 2147483647;
             if (expMs) {
               const msRestantes = expMs - ahora;
-              const timer = setTimeout(() => {
-                logout();
-              }, msRestantes);
-              setIsLoading(false);
-              return () => clearTimeout(timer);
+              if (msRestantes > 0 && msRestantes <= MAX_TIMEOUT_MS) {
+                const timer = setTimeout(() => {
+                  logout();
+                }, msRestantes);
+                setIsLoading(false);
+                return () => clearTimeout(timer);
+              }
             }
           } else {
             logout();
@@ -102,9 +105,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUsuario(data.usuario);
 
     const expMs = obtenerExpiracionJwt(data.token);
+    const MAX_TIMEOUT_MS = 2147483647;
     if (expMs) {
       const msRestantes = expMs - Date.now();
-      if (msRestantes > 0) {
+      if (msRestantes > 0 && msRestantes <= MAX_TIMEOUT_MS) {
         setTimeout(() => {
           logout();
         }, msRestantes);
