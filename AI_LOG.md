@@ -48,3 +48,15 @@
 - **Corregido:** Ajuste de importaciones TypeScript (`import type`) para evitar advertencias de Rollup durante el empaquetado de producción.
 - **Descartado:** No se utilizó TailwindCSS ni frameworks CSS pesados, implementando CSS puro con variables y tokens WCAG 2.2 AA.
 - **Comprendido y explicable:** Sí.
+
+---
+
+## Entrada 5 – Fase 5: Frontend: CRUD de Canchas y Tipos de Cancha
+- **Fecha/hora:** 2026-10-18 18:42
+- **Prompt usado:** Implementa la Fase 5 del plan de trabajo: hooks de TanStack Query para canchas y tipos, listado con filtros reactivos (Sede, Tipo, Estado, Búsqueda texto) y paginación de 10 elementos, detalle de cancha con acciones según rol, modal nativo accesible para confirmación de borrado, toasts de notificación, formulario unificado para crear/editar cancha con validaciones Zod y mapeo de errores del backend, y gestión de tipos de cancha renderizando la descripción estrictamente como texto plano para evidenciar neutralización de XSS.
+- **Resultado:** Implementación completa del módulo de canchas y tipos de cancha: hooks reactivos con `@tanstack/react-query` (`useCanchas`, `useCancha`, `useCrearCancha`, `useActualizarCancha`, `useEliminarCancha`, `useTiposCancha`, `useSedes`); vista de listado `CanchasListPage` con alternancia responsiva tabla/tarjetas (WCAG 1.4.10 reflow), filtros combinados, paginación cliente y visibilidad condicional según rol (`Cliente`, `Trabajador`, `Administrador`); modal de confirmación `ConfirmDialog` con `<dialog>` nativo y trampa de foco; componente `Toast` accesible (`role="status"`, `aria-live="polite"`); vista de detalle `CanchaDetailPage`; formulario `CanchaFormPage` (modo creación y edición unificados, selectores dinámicos, validación Zod y captura de errores 400/422); y vista `TiposCanchaPage` con formulario integrado y renderizado seguro contra XSS (`<p>{tipo.descripcion}</p>`).
+- **Aceptado:** Estructura modular, uso de TanStack Query para invalidación y refresco de caché automático, accesibilidad completa con foco visible y textos descriptivos, y neutralización de XSS demostrada por diseño seguro en React.
+- **Corregido:** Se aseguraron estilos CSS para todas las nuevas vistas (detalle, formulario y tarjetas de tipos de cancha) respetando variables y tokens de diseño accesibles.
+- **Descartado:** No se utilizaron librerías complejas de UI ni manipulación insegura del DOM (`dangerouslySetInnerHTML`).
+- **Comprendido y explicable:** Sí.
+
