@@ -22,6 +22,10 @@ var jwtAudince = builder.Configuration["Jwt:Audience"];
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
         {
+            var key = builder.Configuration["Jwt:Key"] ?? jwtKey;
+            var issuer = builder.Configuration["Jwt:Issuer"] ?? jwtIssuer ?? "CanchasApi";
+            var audience = builder.Configuration["Jwt:Audience"] ?? jwtAudince ?? "CanchasApiUsuarios";
+
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
@@ -29,11 +33,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 ValidateIssuerSigningKey = true,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromMinutes(1),
-                ValidIssuer = jwtIssuer,
-                ValidAudience = jwtAudince,
+                ValidIssuer = issuer,
+                ValidAudience = audience,
+                RoleClaimType = System.Security.Claims.ClaimTypes.Role,
+                NameClaimType = System.Security.Claims.ClaimTypes.Name,
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwtKey))
-
+                    Encoding.UTF8.GetBytes(key))
             };
         });
 builder.Services.AddAuthorization();
@@ -68,18 +73,18 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Rate limiting para mitigar ataques de fuerza bruta en login (configurable para tests)
-var loginPermitLimit = int.TryParse(builder.Configuration["RateLimiting:LoginPermitLimit"], out var limit) ? limit : 5;
-
+// Rate limiting para mitigar ataques de fuerza bruta en login (configurable dinámicamente para tests)
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.AddPolicy("login", httpContext =>
     {
-        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var config = httpContext.RequestServices.GetRequiredService<IConfiguration>();
+        var limit = int.TryParse(config["RateLimiting:LoginPermitLimit"], out var l) ? l : 5;
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "default-client";
         return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
         {
-            PermitLimit = loginPermitLimit,
+            PermitLimit = limit,
             Window = TimeSpan.FromMinutes(1),
             QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
             QueueLimit = 0
