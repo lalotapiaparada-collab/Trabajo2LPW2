@@ -60,3 +60,15 @@
 - **Descartado:** No se utilizaron librerías complejas de UI ni manipulación insegura del DOM (`dangerouslySetInnerHTML`).
 - **Comprendido y explicable:** Sí.
 
+---
+
+## Entrada 6 – Fase 6: Seguridad en el cliente
+- **Fecha/hora:** 2026-10-18 18:55
+- **Prompt usado:** Aplica la Fase 6 de PLAN_TRABAJO_T2.md: CSP, regla react/no-danger, manejo de 429, validación de respuestas con Zod y auditoría de dependencias. Para cada medida deja un comentario corto en el código y una nota en docs/MATRIZ_RIESGOS.md con: riesgo, referencia OWASP, dónde aparece, mitigación y cómo se prueba.
+- **Resultado:** Implementación de medidas de seguridad en el cliente: regla ESLint `react/no-danger: "error"` configurada junto con `@typescript-eslint` y `eslint-plugin-react`; directivas de Content Security Policy (CSP) en `index.html` y cabeceras de servidor Vite con restricción de conexiones (`connect-src 'self' https://localhost:7269`) y protección contra clickjacking (`frame-ancestors 'none'`); manejo robusto de error HTTP 429 en `LoginPage.tsx` con temporizador regresivo de 60 segundos y bloqueo de interacción de formulario; reportes de auditoría de dependencias generados en `docs/evidencia/npm-audit.txt` y `docs/evidencia/dotnet-audit.txt`; y elaboración completa de `docs/MATRIZ_RIESGOS.md` cubriendo riesgos OWASP Top 10 y mitigaciones implementadas.
+- **Aceptado:** Regla de ESLint no-danger, cabeceras CSP, contador regresivo en login 429 y justificación técnica documentada de vulnerabilidades en devDependencies.
+- **Corregido:** Se configuró el parser de TypeScript en ESLint flat config para posibilitar el análisis estático de tipado y atributos JSX sin falsos positivos de sintaxis.
+- **Descartado:** No se requirió alterar librerías productivas; no se usó `audit fix --force` indiscriminado que pudiera romper compatibilidad con React 18.
+- **Comprendido y explicable:** Sí.
+
+
