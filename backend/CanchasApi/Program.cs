@@ -67,6 +67,32 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Middleware de cabeceras de seguridad HTTP
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value ?? string.Empty;
+    var isDevDoc = app.Environment.IsDevelopment() &&
+        (path.StartsWith("/scalar", StringComparison.OrdinalIgnoreCase) ||
+         path.StartsWith("/openapi", StringComparison.OrdinalIgnoreCase) ||
+         path.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase));
+
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["X-Frame-Options"] = "DENY";
+    context.Response.Headers["Referrer-Policy"] = "no-referrer";
+
+    if (!isDevDoc)
+    {
+        context.Response.Headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'";
+    }
+
+    await next();
+});
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
 app.UseRequestLogging(); // middleware propio: registra método, ruta, status y duración
 app.UseCors("FrontendPolicy"); // CORS debe ejecutarse antes de la autenticación
 app.UseAuthentication(); // ¿quién es?
