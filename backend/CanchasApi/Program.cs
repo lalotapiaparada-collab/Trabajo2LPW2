@@ -48,9 +48,27 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
+// Configuración de CORS con orígenes explícitos (prohibido AllowAnyOrigin)
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+if (allowedOrigins is null || allowedOrigins.Length == 0)
+{
+    allowedOrigins = new[] { "https://localhost:5173" };
+}
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+              .WithHeaders("Authorization", "Content-Type", "Accept");
+    });
+});
+
 var app = builder.Build();
 
 app.UseRequestLogging(); // middleware propio: registra método, ruta, status y duración
+app.UseCors("FrontendPolicy"); // CORS debe ejecutarse antes de la autenticación
 app.UseAuthentication(); // ¿quién es?
 app.UseAuthorization(); // ¿qué puede hacer?
 // Endpoint para comprobar conexión a la base de datos
