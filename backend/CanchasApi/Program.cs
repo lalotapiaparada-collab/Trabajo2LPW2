@@ -166,6 +166,9 @@ if (app.Environment.IsDevelopment())
     app.MapGet("/", () => Results.Redirect("/scalar/v1"));
     app.MapGet("/scalar", () => Results.Redirect("/scalar/v1"));
     app.MapGet("/swagger", () => Results.Redirect("/scalar/v1"));
+
+    // Sembrado de datos para pruebas locales y demostración
+    await DevSeeder.SeedAsync(app.Services, app.Configuration, app.Logger);
 }
 
 app.UseHttpsRedirection();
