@@ -13,7 +13,24 @@ export const LoginPage: React.FC = () => {
   const [searchParams] = useSearchParams();
 
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
-  const [esRateLimited, setEsRateLimited] = useState(false);
+  const [segundosRestantes, setSegundosRestantes] = useState(0);
+
+  // Contador regresivo para bloqueo por Rate Limiting (429)
+  React.useEffect(() => {
+    if (segundosRestantes <= 0) return;
+
+    const timer = setInterval(() => {
+      setSegundosRestantes((prev) => {
+        if (prev <= 1) {
+          setErrorGeneral(null);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [segundosRestantes]);
 
   // Ruta a la que intentaba acceder antes del login
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
@@ -33,20 +50,24 @@ export const LoginPage: React.FC = () => {
 
   const onSubmit = async (data: LoginRequest) => {
     setErrorGeneral(null);
-    setEsRateLimited(false);
     try {
       await login(data);
       navigate(from, { replace: true });
     } catch (err) {
       const apiError = err as ApiError;
       if (apiError.status === 429) {
-        setEsRateLimited(true);
-        setErrorGeneral(apiError.message || 'Demasiados intentos fallidos. Espera un minuto.');
+        setSegundosRestantes(60);
+        setErrorGeneral(
+          apiError.message ||
+            'Has superado el límite de intentos permitidos (5 intentos/min). Por tu seguridad, espera un momento.'
+        );
       } else {
         setErrorGeneral(apiError.message || 'Credenciales incorrectas.');
       }
     }
   };
+
+  const esRateLimited = segundosRestantes > 0;
 
   return (
     <div className="login-container">
@@ -111,7 +132,11 @@ export const LoginPage: React.FC = () => {
             disabled={isSubmitting || esRateLimited}
             aria-busy={isSubmitting}
           >
-            {isSubmitting ? 'Verificando...' : 'Ingresar'}
+            {isSubmitting
+              ? 'Verificando...'
+              : esRateLimited
+                ? `Espera ${segundosRestantes}s para reintentar`
+                : 'Ingresar'}
           </button>
         </form>
 
