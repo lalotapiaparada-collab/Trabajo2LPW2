@@ -11,6 +11,13 @@ interface ConfirmDialogProps {
   onCancelar: () => void;
 }
 
+/**
+ * Diálogo Accesible <dialog> (WCAG 2.1.2 No Keyboard Trap, 2.4.3 Focus Order)
+ * - Usa el elemento nativo <dialog> con showModal().
+ * - Atrapa el foco de teclado dentro del diálogo mientras esté abierto.
+ * - Soporta la tecla Escape para cancelar.
+ * - Devuelve el foco al elemento disparador cuando se cierra.
+ */
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isOpen,
   titulo,
@@ -23,29 +30,56 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 }) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const cancelBtnRef = useRef<HTMLButtonElement>(null);
+  const confirmBtnRef = useRef<HTMLButtonElement>(null);
+  const previouslyFocusedElement = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
 
     if (isOpen) {
+      // Guardar el elemento que tenía el foco antes de abrir el modal
+      previouslyFocusedElement.current = document.activeElement as HTMLElement | null;
+
       if (!dialog.open) {
         dialog.showModal();
-        // Mueve el foco inicial al botón de cancelar por seguridad
-        cancelBtnRef.current?.focus();
+        // Mover el foco inicial al botón de cancelar (acción no destructiva)
+        setTimeout(() => {
+          cancelBtnRef.current?.focus();
+        }, 50);
       }
     } else {
       if (dialog.open) {
         dialog.close();
       }
+      // Devolver el foco al elemento que abrió el diálogo (WCAG 2.4.3)
+      previouslyFocusedElement.current?.focus();
     }
   }, [isOpen]);
 
-  // Manejo de la tecla Escape nativa del navegador
+  // Manejo accesible del teclado: Escape y ciclo de foco (Focus Trap)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDialogElement>) => {
     if (e.key === 'Escape') {
       e.preventDefault();
       onCancelar();
+      return;
+    }
+
+    if (e.key === 'Tab') {
+      const cancelBtn = cancelBtnRef.current;
+      const confirmBtn = confirmBtnRef.current;
+
+      if (!cancelBtn || !confirmBtn) return;
+
+      // Trampa de foco: si está en cancelar y presiona Shift+Tab, ir a confirmar
+      if (e.shiftKey && document.activeElement === cancelBtn) {
+        e.preventDefault();
+        confirmBtn.focus();
+      } else if (!e.shiftKey && document.activeElement === confirmBtn) {
+        // Si está en confirmar y presiona Tab, volver a cancelar
+        e.preventDefault();
+        cancelBtn.focus();
+      }
     }
   };
 
@@ -79,6 +113,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             {textoCancelar}
           </button>
           <button
+            ref={confirmBtnRef}
             type="button"
             className="btn btn-danger"
             onClick={onConfirmar}
@@ -92,3 +127,4 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     </dialog>
   );
 };
+export default ConfirmDialog;

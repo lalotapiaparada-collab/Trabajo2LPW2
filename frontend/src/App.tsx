@@ -14,6 +14,8 @@ import { CanchaDetailPage } from './features/canchas/CanchaDetailPage';
 import { CanchaFormPage } from './features/canchas/CanchaFormPage';
 import { TiposCanchaPage } from './features/tipos-cancha/TiposCanchaPage';
 
+import { RouteAccessibilityAnnouncer } from './components/RouteAccessibilityAnnouncer';
+
 // Instancia global de TanStack Query
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,6 +30,7 @@ export const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <RouteAccessibilityAnnouncer />
         <AuthProvider>
           <Routes>
             {/* Ruta pública de Login */}
