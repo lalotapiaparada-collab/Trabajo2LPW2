@@ -131,8 +131,23 @@
 - **Descartado:** No se utilizaron explicaciones abstractas o genéricas no aplicables al código del repositorio.
 - **Comprendido y explicable:** Sí.
 
+---
 
-
-
+## Entrada 11 – Resolución de sembrado de datos y credenciales de prueba (DevSeeder)
+- **Fecha/hora:** 2026-10-18 20:30
+- **Prompt usado:** Correo o contraseña incorrectos.
+- **Resultado:** Diagnóstico de autenticación y corrección del seeder en `backend/CanchasApi/Services/DevSeeder.cs`:
+  1. **Causa raíz:** La base de datos local SQL Server contenía un usuario residual de la entrega previa (`admin@canchas.cl` con rol `Cliente` y hash legado `ipvg2026`). Dado que `DevSeeder.cs` poseía una verificación de salida temprana (`if (await db.Usuarios.AnyAsync()) return;`), la presencia de dicho usuario omitía el sembrado de los roles `Trabajador` y `Cliente`, manteniendo además la contraseña antigua y el rol desactualizado.
+  2. **Implementación:** Refactorización de `DevSeeder.cs` para operar bajo lógica **idempotente (upsert)**:
+     - Normalización de la contraseña por defecto a `Password123!` (alineada con la documentación, los tests y las tarjetas de credenciales en el login del frontend).
+     - Actualización o inserción garantizada de `admin@canchas.cl` con rol `Administrador`.
+     - Actualización o inserción garantizada de `trabajador@canchas.cl` con rol `Trabajador` y vinculación de su entidad asociada `Trabajador`.
+     - Actualización o inserción garantizada de `cliente@canchas.cl` con rol `Cliente`.
+     - Sembrado seguro de `Sedes`, `TiposCancha` y `Canchas` si las tablas respectivas se encuentran vacías.
+  3. **Verificación:** Ejecución y validación en base de datos local SQL Server y pruebas de autenticación contra `/api/v1/usuarios/login`, confirmando respuestas `200 OK` con tokens JWT válidos para los 3 perfiles.
+- **Aceptado:** Estrategia idempotente que preserva datos existentes y garantiza la disponibilidad inmediata de los usuarios de evaluación.
+- **Corregido:** Se eliminó la condición de omisión global para permitir la auto-reparación del entorno de desarrollo.
+- **Descartado:** No se requirió reiniciar o purgar la base de datos completa.
+- **Comprendido y explicable:** Sí.
 
 
