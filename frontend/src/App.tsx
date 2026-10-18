@@ -9,6 +9,8 @@ import { Layout } from './components/Layout';
 import { AccessDeniedPage } from './routes/AccessDeniedPage';
 import { NotFoundPage } from './routes/NotFoundPage';
 
+import { CanchasListPage } from './features/canchas/CanchasListPage';
+
 // Instancia global de TanStack Query
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,15 +34,7 @@ export const App: React.FC = () => {
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
                 {/* Listado de Canchas (Vista principal para todos los usuarios autenticados) */}
-                <Route
-                  path="/"
-                  element={
-                    <div>
-                      <h1>Listado de Canchas</h1>
-                      <p>Módulo de gestión y consulta de canchas (en desarrollo para Fase 5).</p>
-                    </div>
-                  }
-                />
+                <Route path="/" element={<CanchasListPage />} />
 
                 <Route
                   path="/canchas/:id"
