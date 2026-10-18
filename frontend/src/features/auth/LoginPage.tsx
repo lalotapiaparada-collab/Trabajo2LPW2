@@ -3,7 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import { LoginRequest, LoginRequestSchema, ApiError } from '../../types';
+import { LoginRequestSchema } from '../../types';
+import type { LoginRequest, ApiError } from '../../types';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();

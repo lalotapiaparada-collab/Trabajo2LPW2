@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { TOKEN_STORAGE_KEY, USER_STORAGE_KEY } from '../../api/httpClient';
 import { authService } from '../../services/authService';
-import { LoginRequest, UsuarioResponse, UsuarioResponseSchema } from '../../types';
+import { UsuarioResponseSchema } from '../../types';
+import type { LoginRequest, UsuarioResponse } from '../../types';
 
 interface AuthContextType {
   token: string | null;

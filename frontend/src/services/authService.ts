@@ -1,12 +1,6 @@
 import { httpClient } from '../api/httpClient';
-import {
-  LoginRequest,
-  LoginResponse,
-  LoginResponseSchema,
-  RegistroRequest,
-  UsuarioResponse,
-  UsuarioResponseSchema,
-} from '../types';
+import { LoginResponseSchema, UsuarioResponseSchema } from '../types';
+import type { LoginRequest, LoginResponse, RegistroRequest, UsuarioResponse } from '../types';
 
 export const authService = {
   async login(credenciales: LoginRequest): Promise<LoginResponse> {

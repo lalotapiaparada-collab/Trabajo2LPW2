@@ -1,11 +1,7 @@
 import { z } from 'zod';
 import { httpClient } from '../api/httpClient';
-import {
-  CanchaFormData,
-  CanchaResponse,
-  CanchaResponseSchema,
-  FiltrosCancha,
-} from '../types';
+import { CanchaResponseSchema } from '../types';
+import type { CanchaFormData, CanchaResponse, FiltrosCancha } from '../types';
 
 export const canchasService = {
   async listarCanchas(filtros?: FiltrosCancha): Promise<CanchaResponse[]> {

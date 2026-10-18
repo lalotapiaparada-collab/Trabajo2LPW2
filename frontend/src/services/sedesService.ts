@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { httpClient } from '../api/httpClient';
-import { SedeResponse, SedeResponseSchema } from '../types';
+import { SedeResponseSchema } from '../types';
+import type { SedeResponse } from '../types';
 
 export const sedesService = {
   async listarSedes(): Promise<SedeResponse[]> {

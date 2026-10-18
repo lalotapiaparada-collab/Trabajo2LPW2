@@ -1,10 +1,7 @@
 import { z } from 'zod';
 import { httpClient } from '../api/httpClient';
-import {
-  TipoCanchaFormData,
-  TipoCanchaResponse,
-  TipoCanchaResponseSchema,
-} from '../types';
+import { TipoCanchaResponseSchema } from '../types';
+import type { TipoCanchaFormData, TipoCanchaResponse } from '../types';
 
 export const tiposCanchaService = {
   async listarTiposCancha(): Promise<TipoCanchaResponse[]> {

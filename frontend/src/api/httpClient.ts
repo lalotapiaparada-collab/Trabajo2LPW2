@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { ApiError } from '../types';
+import type { ApiError } from '../types';
 
 // Claves de sessionStorage
 export const TOKEN_STORAGE_KEY = 'canchas_auth_token';
