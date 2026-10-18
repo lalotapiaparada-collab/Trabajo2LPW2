@@ -3,6 +3,7 @@ using CanchasApi.Repositories;
 using CanchasApi.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -19,6 +20,15 @@ namespace CanchasApi.Endpoints
             {
                 if (string.IsNullOrWhiteSpace(request.Nombre) || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
                     return Results.BadRequest(new { error = "Nombre, Email y Password son requeridos." });
+
+                if (request.Nombre.Trim().Length > 100)
+                    return Results.BadRequest(new { error = "El nombre no puede superar los 100 caracteres." });
+
+                if (!new EmailAddressAttribute().IsValid(request.Email))
+                    return Results.BadRequest(new { error = "El formato del correo electrónico no es válido." });
+
+                if (request.Password.Length < 8)
+                    return Results.BadRequest(new { error = "La contraseña debe tener al menos 8 caracteres." });
 
                 var existeEmail = await repo.ExisteEmailAsync(request.Email);
                 if (existeEmail)
