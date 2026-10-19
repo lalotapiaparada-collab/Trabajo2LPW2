@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
-import colocoloLogo from '../assets/colocolo-logo.jpg';
+import colocoloLogo from '../assets/colo-colo-logo.jpg';
 
 export const Layout: React.FC = () => {
   const { usuario, logout } = useAuth();
