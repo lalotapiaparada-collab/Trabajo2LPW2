@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
+import colocoloLogo from '../assets/colocolo-logo.jpg';
 
 export const Layout: React.FC = () => {
   const { usuario, logout } = useAuth();
@@ -24,8 +25,11 @@ export const Layout: React.FC = () => {
         <div className="header-container">
           <div className="brand">
             <Link to="/" className="brand-logo" aria-label="Inicio - Sistema Reservas Canchas">
-              <span className="brand-icon" aria-hidden="true">⚽</span>
-              <span className="brand-text">CanchasApp</span>
+              <img src={colocoloLogo} alt="Escudo Oficial Colo-Colo" className="brand-crest" />
+              <div className="brand-text-container">
+                <span className="brand-text">CanchasYa</span>
+                <span className="brand-badge">CSD COLO-COLO</span>
+              </div>
             </Link>
           </div>
 

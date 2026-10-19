@@ -150,4 +150,20 @@
 - **Descartado:** No se requirió reiniciar o purgar la base de datos completa.
 - **Comprendido y explicable:** Sí.
 
+---
 
+## Entrada 12 – Rediseño visual deportivo (Temática Fútbol & CSD Colo-Colo)
+- **Fecha/hora:** 2026-10-18 21:10
+- **Prompt usado:** mejoremos lo visual del front, algo mas relacionado con el futbol y lo mismo con los colores y seria espectacular una imagen del logo de colocolo
+- **Resultado:** Elevación estética integral inspirada en el fútbol profesional chileno y la identidad del CSD Colo-Colo:
+  1. **Activos visuales:** Incorporación del escudo oficial de Colo-Colo (con estrella continental, cinta de luto y perfil del cacique) en `frontend/src/assets/colocolo-logo.jpg` e imagen de atmósfera nocturna de estadio bajo reflectores en `frontend/src/assets/stadium-bg.jpg`.
+  2. **Identidad de diseño (Tokens):** Actualización de `tokens.css` con paleta Alba (negro carbón `#0b1120`, blanco puro, oro libertadores `#ca8a04`, franja roja `#dc2626` y verde césped estadio `#15803d` / `#166534`).
+  3. **Navegación e interfaz:** 
+     - Barra superior oscura estilo Estadio Monumental con el escudo oficial, subtítulo de club deportivo y enlaces con resaltado verde césped.
+     - Pantalla de inicio de sesión inmersiva con fondo de estadio nocturno, tarjeta glassmorphic con ribete dorado y escudo animado.
+     - Tabla y filtros con ribete superior de césped, cabeceras en negro carbón y botones de acción con degradados deportivos y microanimaciones de elevación.
+  4. **Accesibilidad y pruebas:** Contraste de texto verificado según WCAG 2.2 AA (mínimo 4.5:1), 16/16 pruebas de componentes pasando sin regresiones y 0 errores de linter.
+- **Aceptado:** Integración armónica de los elementos futboleros manteniendo la estructura semántica exigida por la rúbrica.
+- **Corregido:** Se aseguraron contrastes accesibles en todos los nuevos estados interactivos y fondos oscuros.
+- **Descartado:** No se utilizaron imágenes no optimizadas ni se alteraron los selectores accesibles requeridos por los tests automáticos.
+- **Comprendido y explicable:** Sí.

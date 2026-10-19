@@ -5,6 +5,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { LoginRequestSchema } from '../../types';
 import type { LoginRequest, ApiError } from '../../types';
+import colocoloLogo from '../../assets/colocolo-logo.jpg';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -73,8 +74,11 @@ export const LoginPage: React.FC = () => {
     <div className="login-container">
       <div className="login-card">
         <header className="login-header">
+          <div className="login-crest-box">
+            <img src={colocoloLogo} alt="Escudo Oficial Colo-Colo" className="login-crest" />
+          </div>
           <h1>Iniciar Sesión</h1>
-          <p>Sistema de Gestión de Reservas de Canchas</p>
+          <p>Recinto Deportivo – CSD Colo-Colo</p>
         </header>
 
         {sesionExpirada && (
