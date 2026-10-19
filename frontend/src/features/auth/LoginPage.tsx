@@ -5,7 +5,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { LoginRequestSchema } from '../../types';
 import type { LoginRequest, ApiError } from '../../types';
-import colocoloLogo from '../../assets/colo-colo-logo.jpg';
+import colocoloLogo from '../../assets/colo-colo-logo-footylogos.png';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
