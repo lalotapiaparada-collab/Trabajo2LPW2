@@ -39,6 +39,7 @@ export const CanchaFormPage: React.FC = () => {
     handleSubmit,
     reset,
     setError,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<CanchaFormData>({
     resolver: zodResolver(CanchaFormSchema),
@@ -49,6 +50,12 @@ export const CanchaFormPage: React.FC = () => {
       estado: 'Disponible',
     },
   });
+
+  const sedeIdSeleccionada = watch('sedeId');
+  const tipoCanchaIdSeleccionado = watch('tipoCanchaId');
+
+  const sedeSeleccionada = sedes.find((s) => s.id === Number(sedeIdSeleccionada));
+  const tipoSeleccionado = tiposCancha.find((t) => t.id === Number(tipoCanchaIdSeleccionado));
 
   // Al cargar la cancha en modo edición, poblar el formulario
   useEffect(() => {
@@ -136,6 +143,23 @@ export const CanchaFormPage: React.FC = () => {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          {/* Identificador de Cancha (Modo Edición) */}
+          {esEdicion && (
+            <div className="form-group">
+              <label htmlFor="cancha-id-info">
+                Identificador de Cancha (ID de Sistema)
+              </label>
+              <input
+                id="cancha-id-info"
+                type="text"
+                value={`#${canchaId}`}
+                disabled
+                readOnly
+                className="form-control-readonly font-mono"
+              />
+            </div>
+          )}
+
           {/* Número de Cancha */}
           <div className="form-group">
             <label htmlFor="numero">
@@ -184,6 +208,15 @@ export const CanchaFormPage: React.FC = () => {
                 {errors.sedeId.message}
               </span>
             )}
+            {sedeSeleccionada && (
+              <div className="field-info-box" aria-live="polite">
+                <span>📍 <strong>Dirección:</strong> {sedeSeleccionada.direccion}</span>
+                {sedeSeleccionada.telefono && (
+                  <span> | 📞 <strong>Tel:</strong> {sedeSeleccionada.telefono}</span>
+                )}
+                <span> | <strong>ID Sede:</strong> #{sedeSeleccionada.id}</span>
+              </div>
+            )}
           </div>
 
           {/* Tipo de Cancha */}
@@ -212,6 +245,15 @@ export const CanchaFormPage: React.FC = () => {
               <span id="tipo-error" className="field-error" role="alert">
                 {errors.tipoCanchaId.message}
               </span>
+            )}
+            {tipoSeleccionado && (
+              <div className="field-info-box" aria-live="polite">
+                <span>💰 <strong>Tarifa:</strong> ${tipoSeleccionado.precioPorHora.toLocaleString('es-CL')} / hr</span>
+                {tipoSeleccionado.descripcion && (
+                  <span> | ℹ️ <strong>Detalle:</strong> {tipoSeleccionado.descripcion}</span>
+                )}
+                <span> | <strong>ID Tipo:</strong> #{tipoSeleccionado.id}</span>
+              </div>
             )}
           </div>
 

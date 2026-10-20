@@ -2,7 +2,7 @@
 
 **Asignatura:** Laboratorio de Programación Web 2 (LPW2)  
 **Semestre:** 2026-2  
-**Estudiante:** (Completar con nombre de estudiante)  
+**Estudiante:** (Rodrigo Eduardo Andres Tapia Parada)
 **Repositorio GitHub:** [lalotapiaparada-collab/Trabajo2LPW2](https://github.com/lalotapiaparada-collab/Trabajo2LPW2)  
 **Fecha:** 18 de octubre de 2026  
 

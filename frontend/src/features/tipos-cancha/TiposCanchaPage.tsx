@@ -134,6 +134,20 @@ export const TiposCanchaPage: React.FC = () => {
           )}
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
+            {tipoEnEdicion && (
+              <div className="form-group">
+                <label htmlFor="tipo-id-info">Identificador de Tipo (ID de Sistema)</label>
+                <input
+                  id="tipo-id-info"
+                  type="text"
+                  value={`#${tipoEnEdicion.id}`}
+                  disabled
+                  readOnly
+                  className="form-control-readonly font-mono"
+                />
+              </div>
+            )}
+
             <div className="form-group">
               <label htmlFor="tipo-nombre">
                 Nombre <span className="required-mark" aria-hidden="true">*</span>
@@ -248,6 +262,7 @@ export const TiposCanchaPage: React.FC = () => {
               {tiposCancha.map((tipo) => (
                 <article key={tipo.id} className="tipo-card">
                   <div>
+                    <span className="card-id-tag font-mono">ID #{tipo.id}</span>
                     <h3>{tipo.nombre}</h3>
                     {/* 
                       SEGURIDAD (Defensa contra XSS):

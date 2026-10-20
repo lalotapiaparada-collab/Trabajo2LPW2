@@ -53,7 +53,7 @@ export const CanchasListPage: React.FC = () => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Filtrado adicional en memoria por texto de búsqueda (número, sede, tipo)
+  // Filtrado adicional en memoria por texto de búsqueda (id, número, sede, tipo, estado)
   const canchasFiltradas = useMemo(() => {
     if (!canchas) return [];
     if (!busqueda.trim()) return canchas;
@@ -61,6 +61,7 @@ export const CanchasListPage: React.FC = () => {
     const query = busqueda.toLowerCase().trim();
     return canchas.filter(
       (c) =>
+        c.id.toString() === query ||
         c.numero.toString().includes(query) ||
         c.sedeNombre.toLowerCase().includes(query) ||
         c.tipoCanchaNombre.toLowerCase().includes(query) ||
@@ -233,6 +234,7 @@ export const CanchasListPage: React.FC = () => {
             <table className="data-table" aria-label="Tabla de canchas deportivas">
               <thead>
                 <tr>
+                  <th scope="col">ID</th>
                   <th scope="col">N°</th>
                   <th scope="col">Sede</th>
                   <th scope="col">Tipo</th>
@@ -246,9 +248,16 @@ export const CanchasListPage: React.FC = () => {
                   const estadoBadgeClass = cancha.estado.toLowerCase().replace(/\s+/g, '-');
                   return (
                     <tr key={cancha.id}>
+                      <td className="font-mono text-muted">#{cancha.id}</td>
                       <td className="font-bold">Cancha {cancha.numero}</td>
-                      <td>{cancha.sedeNombre}</td>
-                      <td>{cancha.tipoCanchaNombre}</td>
+                      <td>
+                        {cancha.sedeNombre}
+                        <span className="text-muted text-xs block">ID: #{cancha.sedeId}</span>
+                      </td>
+                      <td>
+                        {cancha.tipoCanchaNombre}
+                        <span className="text-muted text-xs block">ID: #{cancha.tipoCanchaId}</span>
+                      </td>
                       <td>${cancha.precioPorHora.toLocaleString('es-CL')}</td>
                       <td>
                         <span className={`badge badge-${estadoBadgeClass}`}>
@@ -299,12 +308,16 @@ export const CanchasListPage: React.FC = () => {
               return (
                 <article key={cancha.id} className="cancha-card">
                   <header className="card-header">
-                    <h2>Cancha N° {cancha.numero}</h2>
+                    <div>
+                      <span className="card-id-tag font-mono">ID #{cancha.id}</span>
+                      <h2>Cancha N° {cancha.numero}</h2>
+                    </div>
                     <span className={`badge badge-${estadoBadgeClass}`}>{cancha.estado}</span>
                   </header>
                   <div className="card-body">
-                    <p><strong>Sede:</strong> {cancha.sedeNombre}</p>
-                    <p><strong>Tipo:</strong> {cancha.tipoCanchaNombre}</p>
+                    <p><strong>ID Cancha:</strong> #{cancha.id}</p>
+                    <p><strong>Sede:</strong> {cancha.sedeNombre} <span className="text-muted">(ID: #{cancha.sedeId})</span></p>
+                    <p><strong>Tipo:</strong> {cancha.tipoCanchaNombre} <span className="text-muted">(ID: #{cancha.tipoCanchaId})</span></p>
                     <p><strong>Precio:</strong> ${cancha.precioPorHora.toLocaleString('es-CL')} / hr</p>
                   </div>
                   <footer className="card-footer">

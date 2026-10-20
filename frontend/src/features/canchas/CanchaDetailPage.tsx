@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { useCancha, useEliminarCancha } from './useCanchasQuery';
+import { useCancha, useEliminarCancha, useSedes, useTiposCanchaDisponibles } from './useCanchasQuery';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { Toast } from '../../components/Toast';
 import type { ToastMessage } from '../../components/Toast';
@@ -20,7 +20,12 @@ export const CanchaDetailPage: React.FC = () => {
   const puedeGestionar = esAdmin || esTrabajador;
 
   const { data: cancha, isLoading, isError, error } = useCancha(canchaId);
+  const { data: sedes = [] } = useSedes();
+  const { data: tipos = [] } = useTiposCanchaDisponibles();
   const eliminarMutation = useEliminarCancha();
+
+  const sede = sedes.find((s) => s.id === cancha?.sedeId);
+  const tipo = tipos.find((t) => t.id === cancha?.tipoCanchaId);
 
   const agregarToast = (tipo: ToastMessage['tipo'], texto: string) => {
     const toastId = Date.now().toString();
@@ -104,23 +109,52 @@ export const CanchaDetailPage: React.FC = () => {
       <section className="detail-card">
         <div className="detail-grid">
           <div className="detail-item">
-            <span className="detail-label">Estado</span>
+            <span className="detail-label">ID Cancha</span>
+            <span className="detail-value font-mono">#{cancha.id}</span>
+          </div>
+
+          <div className="detail-item">
+            <span className="detail-label">Número de Cancha</span>
+            <span className="detail-value font-bold">Cancha {cancha.numero}</span>
+          </div>
+
+          <div className="detail-item">
+            <span className="detail-label">Estado Operativo</span>
             <span className={`badge badge-${estadoBadgeClass}`}>{cancha.estado}</span>
           </div>
 
           <div className="detail-item">
             <span className="detail-label">Precio por Hora</span>
-            <span className="detail-value font-bold">${cancha.precioPorHora.toLocaleString('es-CL')}</span>
+            <span className="detail-value font-bold">${cancha.precioPorHora.toLocaleString('es-CL')} / hr</span>
           </div>
 
           <div className="detail-item">
-            <span className="detail-label">Sede</span>
-            <span className="detail-value">{cancha.sedeNombre}</span>
+            <span className="detail-label">Sede Deportiva</span>
+            <span className="detail-value">
+              {cancha.sedeNombre} <span className="text-muted font-normal text-xs">(ID #{cancha.sedeId})</span>
+            </span>
+          </div>
+
+          <div className="detail-item">
+            <span className="detail-label">Dirección de Sede</span>
+            <span className="detail-value">{sede?.direccion || 'No especificada'}</span>
+          </div>
+
+          <div className="detail-item">
+            <span className="detail-label">Teléfono de Sede</span>
+            <span className="detail-value">{sede?.telefono || 'Sin teléfono'}</span>
           </div>
 
           <div className="detail-item">
             <span className="detail-label">Tipo de Cancha</span>
-            <span className="detail-value">{cancha.tipoCanchaNombre}</span>
+            <span className="detail-value">
+              {cancha.tipoCanchaNombre} <span className="text-muted font-normal text-xs">(ID #{cancha.tipoCanchaId})</span>
+            </span>
+          </div>
+
+          <div className="detail-item">
+            <span className="detail-label">Descripción del Tipo</span>
+            <span className="detail-value">{tipo?.descripcion || 'Cancha reglamentaria estándar'}</span>
           </div>
         </div>
       </section>

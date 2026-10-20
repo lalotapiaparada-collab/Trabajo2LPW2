@@ -167,3 +167,28 @@
 - **Corregido:** Se aseguraron contrastes accesibles en todos los nuevos estados interactivos y fondos oscuros.
 - **Descartado:** No se utilizaron imágenes no optimizadas ni se alteraron los selectores accesibles requeridos por los tests automáticos.
 - **Comprendido y explicable:** Sí.
+
+---
+
+## Entrada 13 – Cobertura total de campos de la entidad y recursos relacionados en el Frontend
+- **Fecha/hora:** 2026-10-20 20:30
+- **Prompt usado:** necesito que añadas en base a la rubrica los campos faltantes en el frontend ya que solicitaba minimo 4 pero me gustaria tenerlos todos , sin perder la logica y sin modificar mucho la interfaz
+- **Resultado:** Incorporación de todos los campos del modelo de datos y de los recursos relacionados en las vistas del frontend (Listado, Detalle, Formulario unificado de Canchas y Tipos de Cancha), superando el requerimiento base de 4 campos sin alterar la lógica de negocio ni romper la consistencia visual:
+  1. **Vista de Detalle (`CanchaDetailPage.tsx`):**
+     - Se integraron todos los atributos disponibles en la grilla responsiva: ID de Cancha (`#id`), Número oficial (`numero`), Estado operativo (`estado`), Precio por hora (`precioPorHora`), Sede (`sedeNombre` e `ID Sede`), Dirección de la Sede (`sede.direccion`), Teléfono de contacto de la Sede (`sede.telefono`), Tipo de Cancha (`tipoCanchaNombre` e `ID Tipo`) y Descripción técnica del tipo (`tipo.descripcion`).
+  2. **Vista de Listado (`CanchasListPage.tsx`):**
+     - Se añadió la columna explícita de `ID` (`#id`) en la tabla de datos accesible.
+     - Se enriquecieron las celdas de Sede y Tipo de Cancha con sus respectivos identificadores secundarios (`ID Sede` e `ID Tipo`).
+     - En las tarjetas móviles (`cards-grid`), se incorporó el identificador de cancha y los IDs relacionales.
+     - El filtro reactivo de búsqueda en memoria ahora permite buscar también por ID de cancha.
+  3. **Formulario de Creación / Edición (`CanchaFormPage.tsx`):**
+     - En modo edición se integró un campo accesible de solo lectura para el `ID de Cancha`.
+     - Se agregaron cajas informativas reactivas bajo los selectores de Sede y Tipo de Cancha que muestran dinámicamente la Dirección, Teléfono, Tarifa por hora y Descripción de la opción seleccionada.
+  4. **Gestión de Tipos de Cancha (`TiposCanchaPage.tsx`):**
+     - Visualización del `ID de Tipo` en cada tarjeta del catálogo y en el formulario de edición.
+  5. **Estilos y Accesibilidad (`base.css`):**
+     - Clases para badges de ID (`.badge-id`), etiquetas de tarjetas (`.card-id-tag`), campos de solo lectura accesibles (`.form-control-readonly`) y cajas informativas (`.field-info-box`), manteniendo contraste WCAG 2.2 AA.
+- **Aceptado:** Exposición completa de los atributos del recurso principal y de los recursos relacionados preservando los contratos HTTP, las validaciones con Zod y la navegación móvil.
+- **Corregido:** Se garantizó que los campos informativos en formularios utilicen `aria-live="polite"` y no interfieran con los payloads enviados al backend.
+- **Descartado:** No se alteró el backend ni se rompieron los contratos de API ni los tests existentes.
+- **Comprendido y explicable:** Sí.
