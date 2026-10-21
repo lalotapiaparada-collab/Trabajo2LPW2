@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { useCanchas } from '../canchas/useCanchasQuery';
 import {
   useSedesList,
   useReservasList,
+  useCrearReserva,
   usePagosList,
   useComprobantesList,
   useMantenimientosList,
@@ -33,8 +35,10 @@ export const ModulosHubPage: React.FC = () => {
   const [tabActiva, setTabActiva] = useState<ModuloTab>('sedes');
 
   // Queries de datos
+  const canchasQuery = useCanchas();
   const sedesQuery = useSedesList();
   const reservasQuery = useReservasList();
+  const crearReservaMutation = useCrearReserva();
   const pagosQuery = usePagosList();
   const comprobantesQuery = useComprobantesList();
   const horariosQuery = useHorariosList();
@@ -43,6 +47,49 @@ export const ModulosHubPage: React.FC = () => {
   const notificacionesQuery = useNotificacionesList();
   const trabajadoresQuery = useTrabajadoresList();
   const usuariosQuery = useUsuariosList();
+
+  // Estados para creación de reservas
+  const [mostrarFormReserva, setMostrarFormReserva] = useState(false);
+  const [reservaCanchaId, setReservaCanchaId] = useState<number>(1);
+  const [reservaInicio, setReservaInicio] = useState<string>('');
+  const [reservaFin, setReservaFin] = useState<string>('');
+  const [errorReserva, setErrorReserva] = useState<string | null>(null);
+  const [exitoReserva, setExitoReserva] = useState<string | null>(null);
+
+  const handleCrearReserva = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorReserva(null);
+    setExitoReserva(null);
+
+    const canchaSeleccionadaId = Number(reservaCanchaId) || canchasQuery.data?.[0]?.id || 1;
+
+    if (!reservaInicio || !reservaFin) {
+      setErrorReserva('Ingresa las fechas y horas de inicio y término.');
+      return;
+    }
+    if (new Date(reservaInicio) >= new Date(reservaFin)) {
+      setErrorReserva('La fecha de inicio debe ser anterior a la de término.');
+      return;
+    }
+
+    try {
+      await crearReservaMutation.mutateAsync({
+        canchaId: canchaSeleccionadaId,
+        fechaInicio: new Date(reservaInicio).toISOString(),
+        fechaFin: new Date(reservaFin).toISOString(),
+      });
+      setExitoReserva('¡Reserva creada exitosamente!');
+      setReservaInicio('');
+      setReservaFin('');
+      setTimeout(() => {
+        setMostrarFormReserva(false);
+        setExitoReserva(null);
+      }, 2000);
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string };
+      setErrorReserva(errorObj?.message || 'Error al crear la reserva. Verifica que la cancha no esté ocupada.');
+    }
+  };
 
   const diasSemana = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
@@ -250,9 +297,96 @@ export const ModulosHubPage: React.FC = () => {
         {tabActiva === 'reservas' && (
           <section id="panel-reservas" role="tabpanel" aria-labelledby="tab-reservas">
             <div className="section-title-bar">
-              <h2>Reservas de Canchas</h2>
-              <span className="text-muted text-sm">Endpoints: GET /api/v1/reservas (OWASP BOLA)</span>
+              <div>
+                <h2>Reservas de Canchas</h2>
+                <span className="text-muted text-sm">Endpoints: GET & POST /api/v1/reservas (OWASP BOLA)</span>
+              </div>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() => setMostrarFormReserva((prev) => !prev)}
+              >
+                {mostrarFormReserva ? 'Cerrar Formulario' : '+ Nueva Reserva'}
+              </button>
             </div>
+
+            {/* Formulario Integrado para Crear Reserva */}
+            {mostrarFormReserva && (
+              <form
+                onSubmit={handleCrearReserva}
+                className="form-card"
+                style={{ marginBottom: '1.5rem', maxWidth: '100%' }}
+              >
+                <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-lg)' }}>
+                  Registrar Nueva Reserva
+                </h3>
+
+                {errorReserva && (
+                  <div className="alert alert-danger" role="alert" style={{ marginBottom: '1rem' }}>
+                    {errorReserva}
+                  </div>
+                )}
+                {exitoReserva && (
+                  <div className="alert alert-success" role="alert" style={{ marginBottom: '1rem' }}>
+                    {exitoReserva}
+                  </div>
+                )}
+
+                <div className="filters-grid" style={{ marginBottom: '1rem' }}>
+                  <div className="form-group">
+                    <label htmlFor="reserva-cancha">Seleccionar Cancha</label>
+                    <select
+                      id="reserva-cancha"
+                      value={reservaCanchaId}
+                      onChange={(e) => setReservaCanchaId(Number(e.target.value))}
+                    >
+                      {canchasQuery.data?.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          Cancha {c.numero} – {c.sedeNombre} ({c.tipoCanchaNombre} - ${c.precioPorHora.toLocaleString('es-CL')}/hr)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="reserva-inicio">Fecha y Hora de Inicio</label>
+                    <input
+                      id="reserva-inicio"
+                      type="datetime-local"
+                      value={reservaInicio}
+                      onChange={(e) => setReservaInicio(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="reserva-fin">Fecha y Hora de Fin</label>
+                    <input
+                      id="reserva-fin"
+                      type="datetime-local"
+                      value={reservaFin}
+                      onChange={(e) => setReservaFin(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-actions">
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    onClick={() => setMostrarFormReserva(false)}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-sm"
+                    disabled={crearReservaMutation.isPending}
+                  >
+                    {crearReservaMutation.isPending ? 'Guardando Reserva...' : 'Confirmar Reserva'}
+                  </button>
+                </div>
+              </form>
+            )}
             {reservasQuery.isLoading && (
               <div className="loading-container">
                 <span className="spinner" aria-hidden="true" />

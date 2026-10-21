@@ -89,8 +89,11 @@ export const CanchaDetailPage: React.FC = () => {
           <Link to="/" className="btn btn-outline" aria-label="Volver a la lista de canchas">
             ← Volver
           </Link>
+          <Link to="/modulos" className="btn btn-primary" aria-label="Reservar cancha en módulo de reservas">
+            📅 Reservar Cancha
+          </Link>
           {puedeGestionar && (
-            <Link to={`/canchas/${cancha.id}/editar`} className="btn btn-primary">
+            <Link to={`/canchas/${cancha.id}/editar`} className="btn btn-outline">
               Editar Cancha
             </Link>
           )}

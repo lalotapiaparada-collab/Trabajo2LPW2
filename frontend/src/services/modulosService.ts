@@ -39,6 +39,17 @@ export const modulosService = {
       : [];
   },
 
+  async crearReserva(datos: {
+    canchaId: number;
+    fechaInicio: string;
+    fechaFin: string;
+    usuarioId?: number;
+    trabajadorId?: number;
+  }): Promise<ReservaResponse> {
+    const response = await httpClient.post('/api/v1/reservas', datos);
+    return ReservaResponseSchema.parse(response.data);
+  },
+
   async listarPagos(): Promise<PagoResponse[]> {
     const response = await httpClient.get('/api/v1/pagos');
     return Array.isArray(response.data)

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { modulosService } from '../../services/modulosService';
 
 export const useSedesList = () =>
@@ -12,6 +12,22 @@ export const useReservasList = () =>
     queryKey: ['reservas'],
     queryFn: () => modulosService.listarReservas(),
   });
+
+export const useCrearReserva = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (datos: {
+      canchaId: number;
+      fechaInicio: string;
+      fechaFin: string;
+      usuarioId?: number;
+      trabajadorId?: number;
+    }) => modulosService.crearReserva(datos),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reservas'] });
+    },
+  });
+};
 
 export const usePagosList = () =>
   useQuery({
