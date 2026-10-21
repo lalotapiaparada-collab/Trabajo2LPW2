@@ -304,3 +304,12 @@
 - CSS ya existente en `base.css` reutilizado (`.pagination`, `.pagination-info`, `.pagination-buttons`)
 - Corregida ruta de importación en `PaginacionControls.tsx` (`../../hooks/` → `../hooks/`)
 **Resultado:** TypeScript ✅ | ESLint ✅ | Tests 16/16 ✅ | Build ✅
+
+---
+
+## Entrada 20 – 2026-10-21: Consolidación final de evidencias y optimización móvil
+- **Fecha/hora:** 2026-10-21 02:45
+- **Prompt usado:** Arreglar desbordes de texto en tarjetas y formularios en móvil, asegurar visibilidad de tablas y consolidar todas las evidencias en docs/evidencia/.
+- **Resultado:** Integración de la totalidad de evidencias gráficas y técnicas en docs/evidencia/: 6 capturas de mitigación de seguridad (401, 403, CORS, XSS, 429, cabeceras HTTP), 2 reportes Lighthouse (Desktop y Mobile con 100% de accesibilidad), y 4 capturas responsivas estandarizadas (320px, 390px, 768px, 1280px). Corrección de reglas CSS en ase.css para visibilidad de tablas con scroll horizontal en móviles y ajuste de cajas de formulario y tarjetas KPI.
+- **Aceptado:** Cumplimiento íntegro de la lista de entregables y la rúbrica oficial de evaluación.
+- **Comprendido y explicable:** Sí.
