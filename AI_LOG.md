@@ -208,3 +208,27 @@
 - **Corregido:** Se aseguraron contrastes y estilos responsivos en la lista de notificaciones y tarjetas de horarios.
 - **Descartado:** No se requirieron modificaciones en el backend puesto que todos los endpoints ya se encontraban implementados.
 - **Comprendido y explicable:** Sí.
+
+
+---
+
+## Entrada 15 – Habilitación de Formularios de Creación Interactiva (POST) para Todos los Módulos del Sistema
+- **Fecha/hora:** 2026-10-20 21:25
+- **Prompt usado:** recuerda necesito poder crear todo todo en el frontend no solo ver el contenido
+- **Resultado:** Incorporación de formularios interactivos completos (operaciones HTTP POST) para el 100% de los módulos de la aplicación dentro del **Hub de Gestión (`ModulosHubPage.tsx`)**:
+  1. **Sedes (`POST /api/v1/sedes`):** Formulario para registrar sedes con validación de nombre, dirección y teléfono (restringido a Administrador).
+  2. **Reservas (`POST /api/v1/reservas`):** Formulario de reserva con selección de cancha y fechas de inicio/término.
+  3. **Pagos (`POST /api/v1/pagos`):** Formulario para registrar transacciones de pago asociadas a reservas existentes con montos y métodos válidos (Tarjeta, Transferencia, Efectivo).
+  4. **Comprobantes (`POST /api/v1/comprobantes`):** Emisión de boletas y facturas tributarias asociadas a pagos registrados (Administrador y Trabajador).
+  5. **Horarios (`POST /api/v1/horarios`):** Programación de franjas de funcionamiento (días de la semana y horas de apertura/cierre) por cancha (Administrador y Trabajador).
+  6. **Mantenimientos (`POST /api/v1/mantenimientos`):** Registro de órdenes técnicas con cancha, técnico responsable, fecha de inicio y descripción detallada (Administrador y Trabajador).
+  7. **Reseñas (`POST /api/v1/resenas`):** Valoración de experiencias por clientes con escala de 1 a 5 estrellas y comentarios cualitativos.
+  8. **Notificaciones (`POST /api/v1/notificaciones`):** Envío de mensajes y avisos informativos a usuarios (Administrador y Trabajador).
+  9. **Trabajadores (`POST /api/v1/trabajadores`):** Asignación de rol operativo y turnos a usuarios registrados (restringido a Administrador).
+  10. **Usuarios (`POST /api/v1/usuarios/registro`):** Alta de nuevos usuarios con rol configurable por el Administrador.
+  11. **Canchas y Tipos de Cancha:** Accesos directos y destacados a `/canchas/nueva` y `/tipos-cancha` en el encabezado.
+  12. **Capa HTTP y Mutaciones:** Creación de mutaciones TanStack Query (`useMutation`) con revalidación reactiva (`invalidateQueries`) y mejora en `httpClient.ts` para parsear mensajes de conflicto HTTP 409 (relaciones 1:1 y duplicidad).
+- **Aceptado:** Sí, ahora todos los recursos del sistema pueden crearse e insertarse interactivamente desde la UI cumpliendo WCAG 2.2 AA y RBAC.
+- **Corregido:** Se añadieron selectores desplegables dinámicos que enlazan entidades relacionadas para facilitar la selección sin necesidad de memorizar identificadores numéricos.
+- **Descartado:** No se requirieron migraciones de base de datos ni modificaciones de modelos en el backend.
+- **Comprendido y explicable:** Sí.

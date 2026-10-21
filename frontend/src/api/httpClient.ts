@@ -46,7 +46,7 @@ httpClient.interceptors.response.use(
     if (!error.response) {
       // Error de red o CORS bloqueado
       message = 'No se pudo conectar con el servidor. Verifica tu conexión o certificado HTTPS.';
-    } else if (status === 400 || status === 422) {
+    } else if (status === 400 || status === 422 || status === 409) {
       message = data?.error || data?.detail || 'Datos inválidos. Revisa el formulario.';
       if (data?.errors) {
         fieldErrors = data.errors;
