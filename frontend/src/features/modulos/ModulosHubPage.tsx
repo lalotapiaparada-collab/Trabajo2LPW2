@@ -2,28 +2,38 @@ import React, { useState, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { useCanchas, useCrearCancha, useEliminarCancha } from '../canchas/useCanchasQuery';
-import { useTiposCancha, useCrearTipoCancha } from '../tipos-cancha/useTiposCanchaQuery';
+import { useTiposCancha, useCrearTipoCancha, useEliminarTipoCancha } from '../tipos-cancha/useTiposCanchaQuery';
 import {
   useSedesList,
   useCrearSede,
+  useEliminarSede,
   useReservasList,
   useCrearReserva,
+  useEliminarReserva,
   usePagosList,
   useCrearPago,
+  useEliminarPago,
   useComprobantesList,
   useCrearComprobante,
+  useEliminarComprobante,
   useMantenimientosList,
   useCrearMantenimiento,
+  useEliminarMantenimiento,
   useResenasList,
   useCrearResena,
+  useEliminarResena,
   useNotificacionesList,
   useCrearNotificacion,
+  useEliminarNotificacion,
   useTrabajadoresList,
   useCrearTrabajador,
+  useEliminarTrabajador,
   useUsuariosList,
   useCrearUsuario,
+  useEliminarUsuario,
   useHorariosList,
   useCrearHorario,
+  useEliminarHorario,
 } from './useModulosQuery';
 
 export type ModuloTab =
@@ -59,9 +69,9 @@ const MODULOS_CONFIG: ModuloConfig[] = [
   { id: 'horarios', nombre: 'Horarios de Atención', icono: '⏰', categoria: 'instalaciones', descripcion: 'Apertura y cierre por día de la semana' },
 
   // 2. Operaciones
-  { id: 'reservas', nombre: 'Reservas', icono: '📅', categoria: 'operaciones', descripcion: 'Agendamiento y confirmación de turnos' },
-  { id: 'pagos', nombre: 'Pagos Registrados', icono: '💳', categoria: 'operaciones', descripcion: 'Transacciones, montos y métodos de pago' },
-  { id: 'comprobantes', nombre: 'Comprobantes Fiscales', icono: '📄', categoria: 'operaciones', descripcion: 'Boletas y facturas emitidas por pago' },
+  { id: 'reservas', nombre: 'Reservas de Canchas', icono: '📅', categoria: 'operaciones', descripcion: 'Agendamiento y disponibilidad de turnos' },
+  { id: 'pagos', nombre: 'Pagos y Transacciones', icono: '💳', categoria: 'operaciones', descripcion: 'Registro de cobros y métodos de pago' },
+  { id: 'comprobantes', nombre: 'Comprobantes Fiscales', icono: '📄', categoria: 'operaciones', descripcion: 'Emisión de boletas y facturas oficiales' },
 
   // 3. Servicios
   { id: 'mantenimientos', nombre: 'Mantenimientos', icono: '🔧', categoria: 'servicios', descripcion: 'Bitácora técnica y reparaciones en canchas' },
@@ -73,21 +83,46 @@ const MODULOS_CONFIG: ModuloConfig[] = [
   { id: 'usuarios', nombre: 'Usuarios del Sistema', icono: '👥', categoria: 'administracion', descripcion: 'Cuentas registradas y roles de acceso', adminOnly: true },
 ];
 
+const diasSemana: Record<number, string> = {
+  1: 'Lunes',
+  2: 'Martes',
+  3: 'Miércoles',
+  4: 'Jueves',
+  5: 'Viernes',
+  6: 'Sábado',
+  7: 'Domingo',
+};
+
 export const ModulosHubPage: React.FC = () => {
   const { usuario } = useAuth();
   const esAdmin = usuario?.rol === 'Administrador';
   const esTrabajador = usuario?.rol === 'Trabajador';
   const puedeGestionar = esAdmin || esTrabajador;
 
-  // Sincronización con query string URL (?tab=...)
+  // Sincronización reactiva directa con query string URL (?tab=...)
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') as ModuloTab | null;
-  const tabInicial: ModuloTab = tabParam && MODULOS_CONFIG.some((m) => m.id === tabParam) ? tabParam : 'canchas';
-  const [tabActiva, setTabActiva] = useState<ModuloTab>(tabInicial);
+  const tabActiva: ModuloTab = tabParam && MODULOS_CONFIG.some((m) => m.id === tabParam) ? tabParam : 'canchas';
+
+  const cambiarTab = (tab: ModuloTab) => {
+    setSearchParams({ tab });
+  };
 
   // Estados de filtrado del Hub
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<CategoriaModulo>('todos');
   const [busquedaModulo, setBusquedaModulo] = useState<string>('');
+
+  // Cambiar categoría y sincronizar automáticamente la pestaña activa si no corresponde
+  const handleSeleccionarCategoria = (cat: CategoriaModulo) => {
+    setCategoriaSeleccionada(cat);
+    if (cat !== 'todos') {
+      const modulosDeCategoria = MODULOS_CONFIG.filter((m) => m.categoria === cat && (!m.adminOnly || esAdmin));
+      const moduloActualEnCategoria = modulosDeCategoria.some((m) => m.id === tabActiva);
+      if (!moduloActualEnCategoria && modulosDeCategoria.length > 0) {
+        cambiarTab(modulosDeCategoria[0].id);
+      }
+    }
+  };
 
   // Filtros internos de Canchas
   const [canchasBusqueda, setCanchasBusqueda] = useState<string>('');
@@ -109,20 +144,31 @@ export const ModulosHubPage: React.FC = () => {
   const trabajadoresQuery = useTrabajadoresList();
   const usuariosQuery = useUsuariosList();
 
-  // Mutations
+  // Mutations de Creación
   const crearCanchaMutation = useCrearCancha();
   const eliminarCanchaMutation = useEliminarCancha();
   const crearTipoMutation = useCrearTipoCancha();
+  const eliminarTipoMutation = useEliminarTipoCancha();
   const crearSedeMutation = useCrearSede();
+  const eliminarSedeMutation = useEliminarSede();
   const crearReservaMutation = useCrearReserva();
+  const eliminarReservaMutation = useEliminarReserva();
   const crearPagoMutation = useCrearPago();
+  const eliminarPagoMutation = useEliminarPago();
   const crearComprobanteMutation = useCrearComprobante();
+  const eliminarComprobanteMutation = useEliminarComprobante();
   const crearHorarioMutation = useCrearHorario();
+  const eliminarHorarioMutation = useEliminarHorario();
   const crearMantenimientoMutation = useCrearMantenimiento();
+  const eliminarMantenimientoMutation = useEliminarMantenimiento();
   const crearResenaMutation = useCrearResena();
+  const eliminarResenaMutation = useEliminarResena();
   const crearNotificacionMutation = useCrearNotificacion();
+  const eliminarNotificacionMutation = useEliminarNotificacion();
   const crearTrabajadorMutation = useCrearTrabajador();
+  const eliminarTrabajadorMutation = useEliminarTrabajador();
   const crearUsuarioMutation = useCrearUsuario();
+  const eliminarUsuarioMutation = useEliminarUsuario();
 
   // 1. Canchas Form State
   const [canchaNumero, setCanchaNumero] = useState<string>('');
@@ -147,7 +193,7 @@ export const ModulosHubPage: React.FC = () => {
   const [exitoSede, setExitoSede] = useState<string | null>(null);
 
   // 4. Reservas Form State
-  const [reservaCanchaId, setReservaCanchaId] = useState<number>(1);
+  const [reservaCanchaId, setReservaCanchaId] = useState<number>(0);
   const [reservaInicio, setReservaInicio] = useState<string>('');
   const [reservaFin, setReservaFin] = useState<string>('');
   const [errorReserva, setErrorReserva] = useState<string | null>(null);
@@ -226,11 +272,6 @@ export const ModulosHubPage: React.FC = () => {
     notificaciones: notificacionesQuery.data?.length ?? 0,
     trabajadores: trabajadoresQuery.data?.length ?? 0,
     usuarios: usuariosQuery.data?.length ?? 0,
-  };
-
-  const cambiarTab = (tab: ModuloTab) => {
-    setTabActiva(tab);
-    setSearchParams({ tab });
   };
 
   // Filtrado de módulos en la barra lateral
@@ -342,6 +383,16 @@ export const ModulosHubPage: React.FC = () => {
     }
   };
 
+  const handleEliminarTipo = async (id: number, nombre: string) => {
+    if (window.confirm(`¿Eliminar el tipo de cancha "${nombre}"?`)) {
+      try {
+        await eliminarTipoMutation.mutateAsync(id);
+      } catch {
+        alert('Error al eliminar tipo de cancha. Puede tener canchas asociadas.');
+      }
+    }
+  };
+
   const handleCrearSede = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorSede(null);
@@ -363,7 +414,17 @@ export const ModulosHubPage: React.FC = () => {
       setTimeout(() => setExitoSede(null), 3000);
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
-      setErrorSede(errorObj?.message || 'Error al registrar la sede.');
+      setErrorSede(errorObj?.message || 'Error al crear la sede.');
+    }
+  };
+
+  const handleEliminarSede = async (id: number, nombre: string) => {
+    if (window.confirm(`¿Eliminar la sede "${nombre}"?`)) {
+      try {
+        await eliminarSedeMutation.mutateAsync(id);
+      } catch {
+        alert('Error al eliminar sede. Puede tener canchas asociadas.');
+      }
     }
   };
 
@@ -371,28 +432,38 @@ export const ModulosHubPage: React.FC = () => {
     e.preventDefault();
     setErrorReserva(null);
     setExitoReserva(null);
-    const canchaSeleccionadaId = Number(reservaCanchaId) || canchasQuery.data?.[0]?.id || 1;
-    if (!reservaInicio || !reservaFin) {
-      setErrorReserva('Ingresa las fechas y horas de inicio y término.');
+    const cancha = reservaCanchaId || canchasQuery.data?.[0]?.id;
+    if (!cancha) {
+      setErrorReserva('Selecciona una cancha para reservar.');
       return;
     }
-    if (new Date(reservaInicio) >= new Date(reservaFin)) {
-      setErrorReserva('La fecha de inicio debe ser anterior a la de término.');
+    if (!reservaInicio || !reservaFin) {
+      setErrorReserva('Las fechas de inicio y fin son obligatorias.');
       return;
     }
     try {
       await crearReservaMutation.mutateAsync({
-        canchaId: canchaSeleccionadaId,
+        canchaId: cancha,
         fechaInicio: new Date(reservaInicio).toISOString(),
         fechaFin: new Date(reservaFin).toISOString(),
       });
-      setExitoReserva('¡Reserva creada exitosamente!');
+      setExitoReserva('¡Reserva creada con éxito!');
       setReservaInicio('');
       setReservaFin('');
       setTimeout(() => setExitoReserva(null), 3000);
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
-      setErrorReserva(errorObj?.message || 'Error al crear la reserva.');
+      setErrorReserva(errorObj?.message || 'Error al procesar la reserva. Verifica el horario.');
+    }
+  };
+
+  const handleEliminarReserva = async (id: number) => {
+    if (window.confirm(`¿Estás seguro de cancelar/eliminar la Reserva #${id}?`)) {
+      try {
+        await eliminarReservaMutation.mutateAsync(id);
+      } catch {
+        alert('Error al eliminar la reserva.');
+      }
     }
   };
 
@@ -400,23 +471,23 @@ export const ModulosHubPage: React.FC = () => {
     e.preventDefault();
     setErrorPago(null);
     setExitoPago(null);
-    const reservaIdNum = Number(pagoReservaId) || reservasQuery.data?.[0]?.id;
-    if (!reservaIdNum) {
+    const resId = pagoReservaId || reservasQuery.data?.[0]?.id;
+    const monto = Number(pagoMonto);
+    if (!resId) {
       setErrorPago('Debes seleccionar una reserva válida.');
       return;
     }
-    const montoNum = Number(pagoMonto);
-    if (isNaN(montoNum) || montoNum <= 0) {
-      setErrorPago('El monto debe ser un número mayor a 0.');
+    if (isNaN(monto) || monto <= 0) {
+      setErrorPago('El monto debe ser superior a 0.');
       return;
     }
     try {
       await crearPagoMutation.mutateAsync({
-        reservaId: reservaIdNum,
-        monto: montoNum,
+        reservaId: resId,
+        monto,
         metodoPago: pagoMetodo,
       });
-      setExitoPago('¡Pago registrado exitosamente!');
+      setExitoPago('¡Pago registrado correctamente!');
       setTimeout(() => setExitoPago(null), 3000);
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
@@ -424,26 +495,36 @@ export const ModulosHubPage: React.FC = () => {
     }
   };
 
+  const handleEliminarPago = async (id: number) => {
+    if (window.confirm(`¿Eliminar el registro de Pago #${id}?`)) {
+      try {
+        await eliminarPagoMutation.mutateAsync(id);
+      } catch {
+        alert('Error al eliminar el pago.');
+      }
+    }
+  };
+
   const handleCrearComprobante = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorComprobante(null);
     setExitoComprobante(null);
-    const pagoIdNum = Number(comprobantePagoId) || pagosQuery.data?.[0]?.id;
-    if (!pagoIdNum) {
-      setErrorComprobante('Debes seleccionar un pago registrado.');
+    const pagoId = comprobantePagoId || pagosQuery.data?.[0]?.id;
+    if (!pagoId) {
+      setErrorComprobante('Debes asociar el comprobante a un pago existente.');
       return;
     }
     if (!comprobanteNumero.trim()) {
-      setErrorComprobante('Ingresa el número de comprobante (ej. B001-0001).');
+      setErrorComprobante('El número de comprobante es requerido.');
       return;
     }
     try {
       await crearComprobanteMutation.mutateAsync({
-        pagoId: pagoIdNum,
+        pagoId,
         numeroComprobante: comprobanteNumero.trim(),
         tipo: comprobanteTipo,
       });
-      setExitoComprobante('¡Comprobante electrónico emitido con éxito!');
+      setExitoComprobante('¡Comprobante emitido con éxito!');
       setComprobanteNumero('');
       setTimeout(() => setExitoComprobante(null), 3000);
     } catch (err: unknown) {
@@ -452,35 +533,47 @@ export const ModulosHubPage: React.FC = () => {
     }
   };
 
+  const handleEliminarComprobante = async (id: number) => {
+    if (window.confirm(`¿Eliminar el Comprobante #${id}?`)) {
+      try {
+        await eliminarComprobanteMutation.mutateAsync(id);
+      } catch {
+        alert('Error al eliminar el comprobante.');
+      }
+    }
+  };
+
   const handleCrearHorario = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorHorario(null);
     setExitoHorario(null);
-    const canchaIdNum = Number(horarioCanchaId) || canchasQuery.data?.[0]?.id;
-    if (!canchaIdNum) {
+    const cancha = horarioCanchaId || canchasQuery.data?.[0]?.id;
+    if (!cancha) {
       setErrorHorario('Debes seleccionar una cancha.');
-      return;
-    }
-    if (!horarioApertura || !horarioCierre) {
-      setErrorHorario('Ingresa los horarios de apertura y cierre.');
-      return;
-    }
-    if (horarioApertura >= horarioCierre) {
-      setErrorHorario('La hora de apertura debe ser previa a la de cierre.');
       return;
     }
     try {
       await crearHorarioMutation.mutateAsync({
-        canchaId: canchaIdNum,
+        canchaId: cancha,
         diaSemana: Number(horarioDia),
         horaApertura: horarioApertura,
         horaCierre: horarioCierre,
       });
-      setExitoHorario('¡Horario de atención registrado con éxito!');
+      setExitoHorario('¡Horario asignado exitosamente!');
       setTimeout(() => setExitoHorario(null), 3000);
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
-      setErrorHorario(errorObj?.message || 'Error al registrar el horario.');
+      setErrorHorario(errorObj?.message || 'Error al guardar el horario.');
+    }
+  };
+
+  const handleEliminarHorario = async (id: number) => {
+    if (window.confirm(`¿Eliminar el Horario #${id}?`)) {
+      try {
+        await eliminarHorarioMutation.mutateAsync(id);
+      } catch {
+        alert('Error al eliminar horario.');
+      }
     }
   };
 
@@ -488,28 +581,26 @@ export const ModulosHubPage: React.FC = () => {
     e.preventDefault();
     setErrorMantenimiento(null);
     setExitoMantenimiento(null);
-    const canchaIdNum = Number(mantenimientoCanchaId) || canchasQuery.data?.[0]?.id;
-    const trabajadorIdNum = Number(mantenimientoTrabajadorId) || trabajadoresQuery.data?.[0]?.id;
-    if (!canchaIdNum || !trabajadorIdNum) {
-      setErrorMantenimiento('Selecciona cancha y técnico.');
+    const cancha = mantenimientoCanchaId || canchasQuery.data?.[0]?.id;
+    const trabajador = mantenimientoTrabajadorId || trabajadoresQuery.data?.[0]?.id;
+    if (!cancha || !trabajador) {
+      setErrorMantenimiento('Cancha y Trabajador asignado son obligatorios.');
       return;
     }
     if (!mantenimientoDescripcion.trim() || !mantenimientoInicio) {
-      setErrorMantenimiento('Descripción y fecha de inicio requeridas.');
+      setErrorMantenimiento('Descripción y Fecha de Inicio son obligatorios.');
       return;
     }
     try {
       await crearMantenimientoMutation.mutateAsync({
-        canchaId: canchaIdNum,
-        trabajadorId: trabajadorIdNum,
+        canchaId: cancha,
+        trabajadorId: trabajador,
         descripcion: mantenimientoDescripcion.trim(),
         fechaInicio: new Date(mantenimientoInicio).toISOString(),
         fechaFin: mantenimientoFin ? new Date(mantenimientoFin).toISOString() : undefined,
       });
-      setExitoMantenimiento('¡Bitácora de mantenimiento guardada exitosamente!');
+      setExitoMantenimiento('¡Orden de mantenimiento creada con éxito!');
       setMantenimientoDescripcion('');
-      setMantenimientoInicio('');
-      setMantenimientoFin('');
       setTimeout(() => setExitoMantenimiento(null), 3000);
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
@@ -517,27 +608,47 @@ export const ModulosHubPage: React.FC = () => {
     }
   };
 
+  const handleEliminarMantenimiento = async (id: number) => {
+    if (window.confirm(`¿Eliminar la orden de Mantenimiento #${id}?`)) {
+      try {
+        await eliminarMantenimientoMutation.mutateAsync(id);
+      } catch {
+        alert('Error al eliminar el mantenimiento.');
+      }
+    }
+  };
+
   const handleCrearResena = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorResena(null);
     setExitoResena(null);
-    const reservaIdNum = Number(resenaReservaId) || reservasQuery.data?.[0]?.id;
-    if (!reservaIdNum) {
-      setErrorResena('Selecciona una reserva para calificar.');
+    const resId = resenaReservaId || reservasQuery.data?.[0]?.id;
+    if (!resId) {
+      setErrorResena('Debes seleccionar una reserva completada.');
       return;
     }
     try {
       await crearResenaMutation.mutateAsync({
-        reservaId: reservaIdNum,
+        reservaId: resId,
         calificacion: Number(resenaCalificacion),
         comentario: resenaComentario.trim() || undefined,
       });
-      setExitoResena('¡Gracias por tu reseña! Calificación registrada.');
+      setExitoResena('¡Muchas gracias por calificar nuestro servicio!');
       setResenaComentario('');
       setTimeout(() => setExitoResena(null), 3000);
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
-      setErrorResena(errorObj?.message || 'Error al enviar la reseña.');
+      setErrorResena(errorObj?.message || 'Error al publicar la reseña.');
+    }
+  };
+
+  const handleEliminarResena = async (id: number) => {
+    if (window.confirm(`¿Eliminar la Reseña #${id}?`)) {
+      try {
+        await eliminarResenaMutation.mutateAsync(id);
+      } catch {
+        alert('Error al eliminar la reseña.');
+      }
     }
   };
 
@@ -545,17 +656,21 @@ export const ModulosHubPage: React.FC = () => {
     e.preventDefault();
     setErrorNotificacion(null);
     setExitoNotificacion(null);
-    const usuarioIdNum = Number(notificacionUsuarioId) || usuariosQuery.data?.[0]?.id;
-    if (!usuarioIdNum || !notificacionMensaje.trim()) {
-      setErrorNotificacion('Selecciona destinatario y escribe el mensaje.');
+    const uId = notificacionUsuarioId || usuariosQuery.data?.[0]?.id;
+    if (!uId) {
+      setErrorNotificacion('Selecciona un usuario destinatario.');
+      return;
+    }
+    if (!notificacionMensaje.trim()) {
+      setErrorNotificacion('El mensaje no puede estar vacío.');
       return;
     }
     try {
       await crearNotificacionMutation.mutateAsync({
-        usuarioId: usuarioIdNum,
+        usuarioId: uId,
         mensaje: notificacionMensaje.trim(),
       });
-      setExitoNotificacion('¡Notificación enviada al usuario con éxito!');
+      setExitoNotificacion('¡Notificación enviada!');
       setNotificacionMensaje('');
       setTimeout(() => setExitoNotificacion(null), 3000);
     } catch (err: unknown) {
@@ -564,26 +679,50 @@ export const ModulosHubPage: React.FC = () => {
     }
   };
 
+  const handleEliminarNotificacion = async (id: number) => {
+    if (window.confirm(`¿Eliminar la Notificación #${id}?`)) {
+      try {
+        await eliminarNotificacionMutation.mutateAsync(id);
+      } catch {
+        alert('Error al eliminar la notificación.');
+      }
+    }
+  };
+
   const handleCrearTrabajador = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorTrabajador(null);
     setExitoTrabajador(null);
-    const usuarioIdNum = Number(trabajadorUsuarioId) || usuariosQuery.data?.[0]?.id;
-    if (!usuarioIdNum || !trabajadorCargo.trim() || !trabajadorTurno.trim()) {
-      setErrorTrabajador('Usuario, cargo y turno son obligatorios.');
+    const uId = trabajadorUsuarioId || usuariosQuery.data?.[0]?.id;
+    if (!uId) {
+      setErrorTrabajador('Selecciona un usuario para asignar el cargo.');
+      return;
+    }
+    if (!trabajadorCargo.trim()) {
+      setErrorTrabajador('El cargo es requerido.');
       return;
     }
     try {
       await crearTrabajadorMutation.mutateAsync({
-        usuarioId: usuarioIdNum,
+        usuarioId: uId,
         cargo: trabajadorCargo.trim(),
-        turno: trabajadorTurno.trim(),
+        turno: trabajadorTurno,
       });
-      setExitoTrabajador('¡Trabajador asignado y habilitado en el sistema!');
+      setExitoTrabajador('¡Trabajador asignado exitosamente!');
       setTimeout(() => setExitoTrabajador(null), 3000);
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
-      setErrorTrabajador(errorObj?.message || 'Error al crear trabajador.');
+      setErrorTrabajador(errorObj?.message || 'Error al asignar trabajador.');
+    }
+  };
+
+  const handleEliminarTrabajador = async (id: number, nombre?: string) => {
+    if (window.confirm(`¿Remover a ${nombre || 'este trabajador'} del personal operativo?`)) {
+      try {
+        await eliminarTrabajadorMutation.mutateAsync(id);
+      } catch {
+        alert('Error al remover trabajador.');
+      }
     }
   };
 
@@ -591,12 +730,12 @@ export const ModulosHubPage: React.FC = () => {
     e.preventDefault();
     setErrorUsuario(null);
     setExitoUsuario(null);
-    if (!usuarioNombre.trim() || !usuarioEmail.trim() || !usuarioPassword) {
-      setErrorUsuario('Nombre, correo y contraseña son obligatorios.');
+    if (!usuarioNombre.trim() || !usuarioEmail.trim() || !usuarioPassword.trim()) {
+      setErrorUsuario('Todos los campos son requeridos.');
       return;
     }
     if (usuarioPassword.length < 8) {
-      setErrorUsuario('La contraseña debe tener mínimo 8 caracteres.');
+      setErrorUsuario('La contraseña debe tener al menos 8 caracteres.');
       return;
     }
     try {
@@ -606,110 +745,113 @@ export const ModulosHubPage: React.FC = () => {
         password: usuarioPassword,
         rol: usuarioRol,
       });
-      setExitoUsuario('¡Usuario creado con éxito en el sistema!');
+      setExitoUsuario('¡Usuario registrado exitosamente!');
       setUsuarioNombre('');
       setUsuarioEmail('');
       setUsuarioPassword('');
       setTimeout(() => setExitoUsuario(null), 3000);
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
-      setErrorUsuario(errorObj?.message || 'Error al registrar usuario.');
+      setErrorUsuario(errorObj?.message || 'Error al crear la cuenta.');
     }
   };
 
-  const diasSemana = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  const handleEliminarUsuario = async (id: number, nombre: string) => {
+    if (window.confirm(`¿Eliminar la cuenta del usuario "${nombre}"? Esta acción es irreversible.`)) {
+      try {
+        await eliminarUsuarioMutation.mutateAsync(id);
+      } catch {
+        alert('Error al eliminar usuario.');
+      }
+    }
+  };
 
   return (
     <div className="modulos-hub-page">
+      {/* Encabezado Principal */}
       <header className="page-header" style={{ marginBottom: '1.25rem' }}>
-        <div>
-          <nav aria-label="Ruta de navegación" className="breadcrumb">
-            <Link to="/">Inicio</Link> / <span>Módulos Rápidos</span>
-          </nav>
-          <h1>⚡ Módulos Rápidos y Operaciones Deportivas</h1>
-          <p className="text-muted">
-            Crea nuevos registros directamente en la parte superior y consulta las listas actualizadas en tiempo real abajo.
+        <div className="page-header-content">
+          <span className="badge badge-primary" style={{ marginBottom: '0.4rem', display: 'inline-block' }}>
+            ⚡ Centro Integral de Gestión Deportiva
+          </span>
+          <h1 className="page-title">Módulos Rápidos</h1>
+          <p className="page-subtitle text-muted">
+            Acceso unificado con arquitectura "Crear Arriba / Listar Abajo" para los 12 módulos del recinto
           </p>
         </div>
       </header>
 
-      {/* Tarjetas Métricas KPI para acceso rápido de un clic */}
-      <section aria-label="Resumen Métrico" className="kpi-stats-grid">
+      {/* KPI Stats Grid */}
+      <section className="kpi-stats-grid" aria-label="Indicadores Generales">
         <button
           type="button"
-          className={`kpi-stat-card ${tabActiva === 'canchas' ? 'active' : ''}`}
           onClick={() => cambiarTab('canchas')}
-          aria-label={`Ver Canchas, ${countsMap.canchas} registradas`}
+          className={`kpi-stat-card ${tabActiva === 'canchas' ? 'active' : ''}`}
         >
-          <span className="kpi-stat-icon">⚽</span>
-          <div className="kpi-stat-info">
-            <span className="kpi-stat-value">{countsMap.canchas}</span>
-            <span className="kpi-stat-label">Canchas</span>
+          <div className="kpi-icon-wrap">⚽</div>
+          <div className="kpi-data">
+            <span className="kpi-value">{countsMap.canchas}</span>
+            <span className="kpi-label">Canchas</span>
           </div>
         </button>
 
         <button
           type="button"
-          className={`kpi-stat-card ${tabActiva === 'sedes' ? 'active' : ''}`}
           onClick={() => cambiarTab('sedes')}
-          aria-label={`Ver Sedes, ${countsMap.sedes} registradas`}
+          className={`kpi-stat-card ${tabActiva === 'sedes' ? 'active' : ''}`}
         >
-          <span className="kpi-stat-icon">🏢</span>
-          <div className="kpi-stat-info">
-            <span className="kpi-stat-value">{countsMap.sedes}</span>
-            <span className="kpi-stat-label">Sedes</span>
+          <div className="kpi-icon-wrap">🏢</div>
+          <div className="kpi-data">
+            <span className="kpi-value">{countsMap.sedes}</span>
+            <span className="kpi-label">Sedes</span>
           </div>
         </button>
 
         <button
           type="button"
-          className={`kpi-stat-card ${tabActiva === 'reservas' ? 'active' : ''}`}
           onClick={() => cambiarTab('reservas')}
-          aria-label={`Ver Reservas, ${countsMap.reservas} agendadas`}
+          className={`kpi-stat-card ${tabActiva === 'reservas' ? 'active' : ''}`}
         >
-          <span className="kpi-stat-icon">📅</span>
-          <div className="kpi-stat-info">
-            <span className="kpi-stat-value">{countsMap.reservas}</span>
-            <span className="kpi-stat-label">Reservas</span>
+          <div className="kpi-icon-wrap">📅</div>
+          <div className="kpi-data">
+            <span className="kpi-value">{countsMap.reservas}</span>
+            <span className="kpi-label">Reservas</span>
           </div>
         </button>
 
         <button
           type="button"
-          className={`kpi-stat-card ${tabActiva === 'pagos' ? 'active' : ''}`}
           onClick={() => cambiarTab('pagos')}
-          aria-label={`Ver Pagos, ${countsMap.pagos} transacciones`}
+          className={`kpi-stat-card ${tabActiva === 'pagos' ? 'active' : ''}`}
         >
-          <span className="kpi-stat-icon">💳</span>
-          <div className="kpi-stat-info">
-            <span className="kpi-stat-value">{countsMap.pagos}</span>
-            <span className="kpi-stat-label">Pagos</span>
+          <div className="kpi-icon-wrap">💳</div>
+          <div className="kpi-data">
+            <span className="kpi-value">{countsMap.pagos}</span>
+            <span className="kpi-label">Pagos</span>
           </div>
         </button>
 
         <button
           type="button"
-          className={`kpi-stat-card ${tabActiva === 'mantenimientos' ? 'active' : ''}`}
           onClick={() => cambiarTab('mantenimientos')}
-          aria-label={`Ver Mantenimientos, ${countsMap.mantenimientos} órdenes`}
+          className={`kpi-stat-card ${tabActiva === 'mantenimientos' ? 'active' : ''}`}
         >
-          <span className="kpi-stat-icon">🔧</span>
-          <div className="kpi-stat-info">
-            <span className="kpi-stat-value">{countsMap.mantenimientos}</span>
-            <span className="kpi-stat-label">Mantenimientos</span>
+          <div className="kpi-icon-wrap">🔧</div>
+          <div className="kpi-data">
+            <span className="kpi-value">{countsMap.mantenimientos}</span>
+            <span className="kpi-label">Mantenimientos</span>
           </div>
         </button>
 
         <button
           type="button"
-          className={`kpi-stat-card ${tabActiva === 'resenas' ? 'active' : ''}`}
           onClick={() => cambiarTab('resenas')}
-          aria-label={`Ver Reseñas, ${countsMap.resenas} opiniones`}
+          className={`kpi-stat-card ${tabActiva === 'resenas' ? 'active' : ''}`}
         >
-          <span className="kpi-stat-icon">⭐</span>
-          <div className="kpi-stat-info">
-            <span className="kpi-stat-value">{countsMap.resenas}</span>
-            <span className="kpi-stat-label">Reseñas</span>
+          <div className="kpi-icon-wrap">⭐</div>
+          <div className="kpi-data">
+            <span className="kpi-value">{countsMap.resenas}</span>
+            <span className="kpi-label">Reseñas</span>
           </div>
         </button>
       </section>
@@ -738,28 +880,28 @@ export const ModulosHubPage: React.FC = () => {
             <button
               type="button"
               className={`category-chip ${categoriaSeleccionada === 'todos' ? 'active' : ''}`}
-              onClick={() => setCategoriaSeleccionada('todos')}
+              onClick={() => handleSeleccionarCategoria('todos')}
             >
               Todos (12)
             </button>
             <button
               type="button"
               className={`category-chip ${categoriaSeleccionada === 'instalaciones' ? 'active' : ''}`}
-              onClick={() => setCategoriaSeleccionada('instalaciones')}
+              onClick={() => handleSeleccionarCategoria('instalaciones')}
             >
               🏟️ Instalaciones
             </button>
             <button
               type="button"
               className={`category-chip ${categoriaSeleccionada === 'operaciones' ? 'active' : ''}`}
-              onClick={() => setCategoriaSeleccionada('operaciones')}
+              onClick={() => handleSeleccionarCategoria('operaciones')}
             >
               📅 Operaciones
             </button>
             <button
               type="button"
               className={`category-chip ${categoriaSeleccionada === 'servicios' ? 'active' : ''}`}
-              onClick={() => setCategoriaSeleccionada('servicios')}
+              onClick={() => handleSeleccionarCategoria('servicios')}
             >
               🛠️ Servicios
             </button>
@@ -767,7 +909,7 @@ export const ModulosHubPage: React.FC = () => {
               <button
                 type="button"
                 className={`category-chip ${categoriaSeleccionada === 'administracion' ? 'active' : ''}`}
-                onClick={() => setCategoriaSeleccionada('administracion')}
+                onClick={() => handleSeleccionarCategoria('administracion')}
               >
                 👥 Administración
               </button>
@@ -819,7 +961,7 @@ export const ModulosHubPage: React.FC = () => {
                 {puedeGestionar && (
                   <form onSubmit={handleCrearCancha} className="form-card" style={{ marginBottom: '1.75rem', maxWidth: '100%' }}>
                     <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-lg)', color: 'var(--color-primary)' }}>
-                      ➕ Registrar Nueva Cancha
+                      ➕ Registrar Nueva Cancha Deportiva
                     </h3>
                     {errorCancha && <div className="alert alert-danger" role="alert" style={{ marginBottom: '1rem' }}>{errorCancha}</div>}
                     {exitoCancha && <div className="alert alert-success" role="alert" style={{ marginBottom: '1rem' }}>{exitoCancha}</div>}
@@ -830,33 +972,33 @@ export const ModulosHubPage: React.FC = () => {
                           id="cancha-numero-input"
                           type="number"
                           min="1"
-                          placeholder="Ej. 10"
+                          placeholder="Ej. 1"
                           value={canchaNumero}
                           onChange={(e) => setCanchaNumero(e.target.value)}
                           required
                         />
                       </div>
                       <div className="form-group">
-                        <label htmlFor="cancha-sede-select">Sede *</label>
+                        <label htmlFor="cancha-sede-select">Sede del Recinto *</label>
                         <select
                           id="cancha-sede-select"
                           value={canchaSedeId || (sedesQuery.data?.[0]?.id ?? 0)}
                           onChange={(e) => setCanchaSedeId(Number(e.target.value))}
                         >
                           {sedesQuery.data?.map((s) => (
-                            <option key={s.id} value={s.id}>{s.nombre}</option>
+                            <option key={s.id} value={s.id}>{s.nombre} ({s.direccion})</option>
                           ))}
                         </select>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="cancha-tipo-select">Tipo de Cancha *</label>
+                        <label htmlFor="cancha-tipo-select">Disciplina / Tipo *</label>
                         <select
                           id="cancha-tipo-select"
                           value={canchaTipoId || (tiposQuery.data?.[0]?.id ?? 0)}
                           onChange={(e) => setCanchaTipoId(Number(e.target.value))}
                         >
                           {tiposQuery.data?.map((t) => (
-                            <option key={t.id} value={t.id}>{t.nombre} (${t.precioPorHora.toLocaleString('es-CL')}/h)</option>
+                            <option key={t.id} value={t.id}>{t.nombre} - ${t.precioPorHora.toLocaleString('es-CL')}/h</option>
                           ))}
                         </select>
                       </div>
@@ -868,93 +1010,78 @@ export const ModulosHubPage: React.FC = () => {
                           onChange={(e) => setCanchaEstado(e.target.value as 'Disponible' | 'Mantenimiento' | 'Fuera de servicio')}
                         >
                           <option value="Disponible">Disponible</option>
-                          <option value="Mantenimiento">En Mantenimiento</option>
-                          <option value="Fuera de servicio">Fuera de Servicio</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="form-actions">
-                      <button type="submit" className="btn btn-primary btn-sm" disabled={crearCanchaMutation.isPending}>
-                        {crearCanchaMutation.isPending ? 'Guardando...' : 'Guardar Cancha'}
-                      </button>
-                    </div>
-                  </form>
-                )}
-
-                {/* LISTA ABAJO CON FILTROS */}
-                <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '1.25rem', marginBottom: '1.25rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
-                    <h3 style={{ margin: 0, fontSize: 'var(--font-size-md)' }}>
-                      📋 Lista de Canchas Registradas ({canchasFiltradas.length})
-                    </h3>
-                  </div>
-
-                  {/* Barra de Filtros de Canchas */}
-                  <div className="filters-card" style={{ marginBottom: '1.25rem', padding: '1rem' }}>
-                    <div className="filters-grid">
-                      <div className="form-group">
-                        <label htmlFor="filtro-cancha-busqueda">Búsqueda rápida</label>
-                        <input
-                          id="filtro-cancha-busqueda"
-                          type="search"
-                          placeholder="Buscar por N°, sede, tipo..."
-                          value={canchasBusqueda}
-                          onChange={(e) => setCanchasBusqueda(e.target.value)}
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label htmlFor="filtro-cancha-sede">Sede</label>
-                        <select
-                          id="filtro-cancha-sede"
-                          value={canchasFiltroSede}
-                          onChange={(e) => setCanchasFiltroSede(e.target.value)}
-                        >
-                          <option value="">Todas las sedes</option>
-                          {sedesQuery.data?.map((s) => (
-                            <option key={s.id} value={s.id.toString()}>{s.nombre}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="form-group">
-                        <label htmlFor="filtro-cancha-tipo">Tipo de Cancha</label>
-                        <select
-                          id="filtro-cancha-tipo"
-                          value={canchasFiltroTipo}
-                          onChange={(e) => setCanchasFiltroTipo(e.target.value)}
-                        >
-                          <option value="">Todos los tipos</option>
-                          {tiposQuery.data?.map((t) => (
-                            <option key={t.id} value={t.id.toString()}>{t.nombre}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="form-group">
-                        <label htmlFor="filtro-cancha-estado">Estado</label>
-                        <select
-                          id="filtro-cancha-estado"
-                          value={canchasFiltroEstado}
-                          onChange={(e) => setCanchasFiltroEstado(e.target.value)}
-                        >
-                          <option value="">Todos los estados</option>
-                          <option value="Disponible">Disponible</option>
                           <option value="Mantenimiento">Mantenimiento</option>
                           <option value="Fuera de servicio">Fuera de servicio</option>
                         </select>
                       </div>
                     </div>
+                    <div className="form-actions">
+                      <button type="submit" className="btn btn-primary btn-sm" disabled={crearCanchaMutation.isPending}>
+                        {crearCanchaMutation.isPending ? 'Guardando Cancha...' : 'Guardar Cancha'}
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {/* FILTROS DE BÚSQUEDA RÁPIDA */}
+                <div className="filters-card" style={{ marginBottom: '1.25rem' }}>
+                  <div className="filters-grid">
+                    <div className="form-group">
+                      <label htmlFor="busqueda-canchas">🔍 Búsqueda rápida</label>
+                      <input
+                        id="busqueda-canchas"
+                        type="search"
+                        placeholder="Buscar por número, sede, tipo o estado..."
+                        value={canchasBusqueda}
+                        onChange={(e) => setCanchasBusqueda(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="filtro-sede-canchas">Sede</label>
+                      <select id="filtro-sede-canchas" value={canchasFiltroSede} onChange={(e) => setCanchasFiltroSede(e.target.value)}>
+                        <option value="">Todas las sedes</option>
+                        {sedesQuery.data?.map((s) => (
+                          <option key={s.id} value={s.id.toString()}>{s.nombre}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="filtro-tipo-canchas">Tipo de Cancha</label>
+                      <select id="filtro-tipo-canchas" value={canchasFiltroTipo} onChange={(e) => setCanchasFiltroTipo(e.target.value)}>
+                        <option value="">Todos los tipos</option>
+                        {tiposQuery.data?.map((t) => (
+                          <option key={t.id} value={t.id.toString()}>{t.nombre}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="filtro-estado-canchas">Estado</label>
+                      <select id="filtro-estado-canchas" value={canchasFiltroEstado} onChange={(e) => setCanchasFiltroEstado(e.target.value)}>
+                        <option value="">Todos los estados</option>
+                        <option value="Disponible">Disponible</option>
+                        <option value="Mantenimiento">Mantenimiento</option>
+                        <option value="Fuera de servicio">Fuera de servicio</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
+
+                {/* LISTA ABAJO */}
+                <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-md)', borderTop: '1px solid var(--color-border)', paddingTop: '1.25rem' }}>
+                  📋 Lista de Canchas Registradas ({canchasFiltradas.length})
+                </h3>
 
                 {canchasQuery.isLoading && (
                   <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando canchas...</span></div>
                 )}
-                {canchasFiltradas.length === 0 && !canchasQuery.isLoading && (
+                {canchasQuery.isError && (
+                  <div className="alert alert-danger" role="alert">⚠️ Error al cargar el catálogo de canchas.</div>
+                )}
+                {canchasFiltradas.length === 0 && !canchasQuery.isLoading && !canchasQuery.isError && (
                   <div className="empty-state">
                     <span className="empty-icon">⚽</span>
                     <h3>No se encontraron canchas con los filtros aplicados</h3>
+                    <p className="text-muted">Crea una nueva cancha arriba o restablece los filtros.</p>
                   </div>
                 )}
                 {canchasFiltradas.length > 0 && (
@@ -1021,7 +1148,7 @@ export const ModulosHubPage: React.FC = () => {
                 <div className="section-title-bar">
                   <div>
                     <h2>🏷️ Tipos de Cancha y Disciplinas</h2>
-                    <span className="text-muted text-sm">Crea una disciplina arriba y consulta las existentes abajo</span>
+                    <span className="text-muted text-sm">Define disciplinas deportivas y tarifas horarias</span>
                   </div>
                 </div>
 
@@ -1035,18 +1162,18 @@ export const ModulosHubPage: React.FC = () => {
                     {exitoTipo && <div className="alert alert-success" role="alert" style={{ marginBottom: '1rem' }}>{exitoTipo}</div>}
                     <div className="filters-grid" style={{ marginBottom: '1rem' }}>
                       <div className="form-group">
-                        <label htmlFor="tipo-nombre-input">Nombre de la Disciplina *</label>
+                        <label htmlFor="tipo-nombre-input">Nombre de la Disciplina / Tipo *</label>
                         <input
                           id="tipo-nombre-input"
                           type="text"
-                          placeholder="Ej. Pádel Panorámico Techado"
+                          placeholder="Ej. Pádel Techado, Fútbol 7, Tenis Arcilla"
                           value={tipoNombre}
                           onChange={(e) => setTipoNombre(e.target.value)}
                           required
                         />
                       </div>
                       <div className="form-group">
-                        <label htmlFor="tipo-precio-input">Precio por Hora ($ CLP) *</label>
+                        <label htmlFor="tipo-precio-input">Precio Referencial por Hora (CLP) *</label>
                         <input
                           id="tipo-precio-input"
                           type="number"
@@ -1084,24 +1211,51 @@ export const ModulosHubPage: React.FC = () => {
                 {tiposQuery.isLoading && (
                   <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando tipos de cancha...</span></div>
                 )}
+                {tiposQuery.isError && (
+                  <div className="alert alert-danger" role="alert">⚠️ Error al cargar los tipos de cancha.</div>
+                )}
+                {tiposQuery.data && tiposQuery.data.length === 0 && !tiposQuery.isLoading && (
+                  <div className="empty-state">
+                    <span className="empty-icon">🏷️</span>
+                    <h3>No hay tipos de cancha registrados</h3>
+                    <p className="text-muted">Crea una nueva disciplina en el formulario de arriba.</p>
+                  </div>
+                )}
                 {tiposQuery.data && tiposQuery.data.length > 0 && (
-                  <div className="cards-grid">
-                    {tiposQuery.data.map((t) => (
-                      <article key={t.id} className="cancha-card">
-                        <header className="card-header">
-                          <div>
-                            <span className="card-id-tag font-mono">ID #{t.id}</span>
-                            <h3>{t.nombre}</h3>
-                          </div>
-                          <span className="badge badge-disponible">
-                            ${t.precioPorHora.toLocaleString('es-CL')} / hr
-                          </span>
-                        </header>
-                        <div className="card-body">
-                          <p>{t.descripcion || 'Sin descripción detallada registrada.'}</p>
-                        </div>
-                      </article>
-                    ))}
+                  <div className="table-responsive">
+                    <table className="data-table" aria-label="Tabla de Tipos de Cancha">
+                      <thead>
+                        <tr>
+                          <th scope="col">ID</th>
+                          <th scope="col">Disciplina</th>
+                          <th scope="col">Descripción</th>
+                          <th scope="col">Tarifa / Hora</th>
+                          {puedeGestionar && <th scope="col">Acciones</th>}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {tiposQuery.data.map((t) => (
+                          <tr key={t.id}>
+                            <td className="font-mono text-muted">#{t.id}</td>
+                            <td className="font-bold">{t.nombre}</td>
+                            <td>{t.descripcion || 'Sin descripción'}</td>
+                            <td className="font-bold text-success">${t.precioPorHora.toLocaleString('es-CL')}</td>
+                            {puedeGestionar && (
+                              <td>
+                                <button
+                                  type="button"
+                                  className="btn btn-danger btn-sm"
+                                  onClick={() => handleEliminarTipo(t.id, t.nombre)}
+                                  disabled={eliminarTipoMutation.isPending}
+                                >
+                                  Eliminar
+                                </button>
+                              </td>
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </section>
@@ -1155,22 +1309,51 @@ export const ModulosHubPage: React.FC = () => {
                 {sedesQuery.isLoading && (
                   <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando sedes...</span></div>
                 )}
+                {sedesQuery.isError && (
+                  <div className="alert alert-danger" role="alert">⚠️ Error al cargar las sedes.</div>
+                )}
+                {sedesQuery.data && sedesQuery.data.length === 0 && !sedesQuery.isLoading && (
+                  <div className="empty-state">
+                    <span className="empty-icon">🏢</span>
+                    <h3>No hay sedes registradas</h3>
+                    <p className="text-muted">Ingresa la primera sede en el formulario de arriba.</p>
+                  </div>
+                )}
                 {sedesQuery.data && sedesQuery.data.length > 0 && (
-                  <div className="cards-grid">
-                    {sedesQuery.data.map((sede) => (
-                      <article key={sede.id} className="cancha-card">
-                        <header className="card-header">
-                          <div>
-                            <span className="card-id-tag">ID #{sede.id}</span>
-                            <h3>{sede.nombre}</h3>
-                          </div>
-                        </header>
-                        <div className="card-body">
-                          <p>📍 <strong>Dirección:</strong> {sede.direccion}</p>
-                          <p>📞 <strong>Teléfono:</strong> {sede.telefono || 'Sin teléfono registrado'}</p>
-                        </div>
-                      </article>
-                    ))}
+                  <div className="table-responsive">
+                    <table className="data-table" aria-label="Tabla de Sedes">
+                      <thead>
+                        <tr>
+                          <th scope="col">ID</th>
+                          <th scope="col">Nombre</th>
+                          <th scope="col">Dirección</th>
+                          <th scope="col">Teléfono</th>
+                          {esAdmin && <th scope="col">Acciones</th>}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sedesQuery.data.map((sede) => (
+                          <tr key={sede.id}>
+                            <td className="font-mono text-muted">#{sede.id}</td>
+                            <td className="font-bold">{sede.nombre}</td>
+                            <td>📍 {sede.direccion}</td>
+                            <td>{sede.telefono ? `📞 ${sede.telefono}` : '—'}</td>
+                            {esAdmin && (
+                              <td>
+                                <button
+                                  type="button"
+                                  className="btn btn-danger btn-sm"
+                                  onClick={() => handleEliminarSede(sede.id, sede.nombre)}
+                                  disabled={eliminarSedeMutation.isPending}
+                                >
+                                  Eliminar
+                                </button>
+                              </td>
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </section>
@@ -1196,7 +1379,7 @@ export const ModulosHubPage: React.FC = () => {
                   <div className="filters-grid" style={{ marginBottom: '1rem' }}>
                     <div className="form-group">
                       <label htmlFor="reserva-cancha">Seleccionar Cancha *</label>
-                      <select id="reserva-cancha" value={reservaCanchaId} onChange={(e) => setReservaCanchaId(Number(e.target.value))}>
+                      <select id="reserva-cancha" value={reservaCanchaId || (canchasQuery.data?.[0]?.id ?? 0)} onChange={(e) => setReservaCanchaId(Number(e.target.value))}>
                         {canchasQuery.data?.map((c) => (
                           <option key={c.id} value={c.id}>
                             Cancha #{c.numero} ({c.tipoCanchaNombre} - {c.sedeNombre}) - ${c.precioPorHora.toLocaleString('es-CL')}/h
@@ -1228,8 +1411,15 @@ export const ModulosHubPage: React.FC = () => {
                 {reservasQuery.isLoading && (
                   <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando reservas...</span></div>
                 )}
-                {reservasQuery.data && reservasQuery.data.length === 0 && (
-                  <div className="empty-state"><span className="empty-icon">📅</span><h3>No hay reservas registradas</h3></div>
+                {reservasQuery.isError && (
+                  <div className="alert alert-danger" role="alert">⚠️ Error al cargar las reservas.</div>
+                )}
+                {reservasQuery.data && reservasQuery.data.length === 0 && !reservasQuery.isLoading && (
+                  <div className="empty-state">
+                    <span className="empty-icon">📅</span>
+                    <h3>No hay reservas registradas</h3>
+                    <p className="text-muted">Registra tu primera reserva seleccionando una cancha y horario arriba.</p>
+                  </div>
                 )}
                 {reservasQuery.data && reservasQuery.data.length > 0 && (
                   <div className="table-responsive">
@@ -1238,10 +1428,11 @@ export const ModulosHubPage: React.FC = () => {
                         <tr>
                           <th scope="col">ID</th>
                           <th scope="col">Cancha</th>
-                          <th scope="col">Usuario</th>
+                          <th scope="col">Cliente</th>
                           <th scope="col">Inicio</th>
                           <th scope="col">Fin</th>
                           <th scope="col">Estado</th>
+                          <th scope="col">Acciones</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1253,6 +1444,16 @@ export const ModulosHubPage: React.FC = () => {
                             <td>{new Date(r.fechaInicio).toLocaleString('es-CL')}</td>
                             <td>{new Date(r.fechaFin).toLocaleString('es-CL')}</td>
                             <td><span className={`badge badge-${r.estado.toLowerCase()}`}>{r.estado}</span></td>
+                            <td>
+                              <button
+                                type="button"
+                                className="btn btn-danger btn-sm"
+                                onClick={() => handleEliminarReserva(r.id)}
+                                disabled={eliminarReservaMutation.isPending}
+                              >
+                                Cancelar
+                              </button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -1318,8 +1519,15 @@ export const ModulosHubPage: React.FC = () => {
                 {pagosQuery.isLoading && (
                   <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando pagos...</span></div>
                 )}
-                {pagosQuery.data && pagosQuery.data.length === 0 && (
-                  <div className="empty-state"><span className="empty-icon">💳</span><h3>Sin transacciones registradas</h3></div>
+                {pagosQuery.isError && (
+                  <div className="alert alert-danger" role="alert">⚠️ Error al cargar las transacciones de pago.</div>
+                )}
+                {pagosQuery.data && pagosQuery.data.length === 0 && !pagosQuery.isLoading && (
+                  <div className="empty-state">
+                    <span className="empty-icon">💳</span>
+                    <h3>Sin transacciones registradas</h3>
+                    <p className="text-muted">Registra el pago de una reserva en el formulario de arriba.</p>
+                  </div>
                 )}
                 {pagosQuery.data && pagosQuery.data.length > 0 && (
                   <div className="table-responsive">
@@ -1333,6 +1541,7 @@ export const ModulosHubPage: React.FC = () => {
                           <th scope="col">Método</th>
                           <th scope="col">Estado</th>
                           <th scope="col">Fecha</th>
+                          {puedeGestionar && <th scope="col">Acciones</th>}
                         </tr>
                       </thead>
                       <tbody>
@@ -1341,10 +1550,22 @@ export const ModulosHubPage: React.FC = () => {
                             <td className="font-mono text-muted">#{p.id}</td>
                             <td>Reserva #{p.reservaId}</td>
                             <td>{p.usuarioNombre || 'Cliente'}</td>
-                            <td className="font-bold">${p.monto.toLocaleString('es-CL')}</td>
+                            <td className="font-bold text-success">${p.monto.toLocaleString('es-CL')}</td>
                             <td>{p.metodoPago}</td>
                             <td><span className={`badge badge-${p.estado.toLowerCase()}`}>{p.estado}</span></td>
                             <td>{p.fechaPago ? new Date(p.fechaPago).toLocaleDateString('es-CL') : '—'}</td>
+                            {puedeGestionar && (
+                              <td>
+                                <button
+                                  type="button"
+                                  className="btn btn-danger btn-sm"
+                                  onClick={() => handleEliminarPago(p.id)}
+                                  disabled={eliminarPagoMutation.isPending}
+                                >
+                                  Eliminar
+                                </button>
+                              </td>
+                            )}
                           </tr>
                         ))}
                       </tbody>
@@ -1411,8 +1632,15 @@ export const ModulosHubPage: React.FC = () => {
                 {comprobantesQuery.isLoading && (
                   <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando comprobantes...</span></div>
                 )}
-                {comprobantesQuery.data && comprobantesQuery.data.length === 0 && (
-                  <div className="empty-state"><span className="empty-icon">📄</span><h3>No hay comprobantes emitidos</h3></div>
+                {comprobantesQuery.isError && (
+                  <div className="alert alert-danger" role="alert">⚠️ Error al cargar los comprobantes emitidos.</div>
+                )}
+                {comprobantesQuery.data && comprobantesQuery.data.length === 0 && !comprobantesQuery.isLoading && (
+                  <div className="empty-state">
+                    <span className="empty-icon">📄</span>
+                    <h3>No hay comprobantes emitidos</h3>
+                    <p className="text-muted">Genera una boleta o factura a partir de un pago registrado arriba.</p>
+                  </div>
                 )}
                 {comprobantesQuery.data && comprobantesQuery.data.length > 0 && (
                   <div className="table-responsive">
@@ -1425,6 +1653,7 @@ export const ModulosHubPage: React.FC = () => {
                           <th scope="col">Pago Asociado</th>
                           <th scope="col">Monto</th>
                           <th scope="col">Emisión</th>
+                          {puedeGestionar && <th scope="col">Acciones</th>}
                         </tr>
                       </thead>
                       <tbody>
@@ -1434,8 +1663,20 @@ export const ModulosHubPage: React.FC = () => {
                             <td className="font-bold">{c.numeroComprobante}</td>
                             <td><span className="badge badge-disponible">{c.tipo}</span></td>
                             <td>Pago #{c.pagoId}</td>
-                            <td className="font-bold">{c.monto ? `$${c.monto.toLocaleString('es-CL')}` : '—'}</td>
+                            <td className="font-bold text-success">{c.monto ? `$${c.monto.toLocaleString('es-CL')}` : '—'}</td>
                             <td>{new Date(c.fechaEmision).toLocaleDateString('es-CL')}</td>
+                            {puedeGestionar && (
+                              <td>
+                                <button
+                                  type="button"
+                                  className="btn btn-danger btn-sm"
+                                  onClick={() => handleEliminarComprobante(c.id)}
+                                  disabled={eliminarComprobanteMutation.isPending}
+                                >
+                                  Eliminar
+                                </button>
+                              </td>
+                            )}
                           </tr>
                         ))}
                       </tbody>
@@ -1509,23 +1750,53 @@ export const ModulosHubPage: React.FC = () => {
                 {horariosQuery.isLoading && (
                   <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando horarios...</span></div>
                 )}
+                {horariosQuery.isError && (
+                  <div className="alert alert-danger" role="alert">⚠️ Error al cargar los horarios de atención.</div>
+                )}
+                {horariosQuery.data && horariosQuery.data.length === 0 && !horariosQuery.isLoading && (
+                  <div className="empty-state">
+                    <span className="empty-icon">⏰</span>
+                    <h3>No hay horarios asignados</h3>
+                    <p className="text-muted">Define los turnos de apertura y cierre para las canchas arriba.</p>
+                  </div>
+                )}
                 {horariosQuery.data && horariosQuery.data.length > 0 && (
-                  <div className="cards-grid">
-                    {horariosQuery.data.map((h) => (
-                      <article key={h.id} className="cancha-card">
-                        <header className="card-header">
-                          <div>
-                            <span className="card-id-tag font-mono">ID #{h.id}</span>
-                            <h3>Cancha {h.canchaNumero || h.canchaId}</h3>
-                          </div>
-                          <span className="badge badge-disponible">{diasSemana[h.diaSemana] || `Día ${h.diaSemana}`}</span>
-                        </header>
-                        <div className="card-body">
-                          <p>🕒 <strong>Apertura:</strong> {h.horaApertura}</p>
-                          <p>🔒 <strong>Cierre:</strong> {h.horaCierre}</p>
-                        </div>
-                      </article>
-                    ))}
+                  <div className="table-responsive">
+                    <table className="data-table" aria-label="Tabla de Horarios">
+                      <thead>
+                        <tr>
+                          <th scope="col">ID</th>
+                          <th scope="col">Cancha</th>
+                          <th scope="col">Día</th>
+                          <th scope="col">Hora Apertura</th>
+                          <th scope="col">Hora Cierre</th>
+                          {puedeGestionar && <th scope="col">Acciones</th>}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {horariosQuery.data.map((h) => (
+                          <tr key={h.id}>
+                            <td className="font-mono text-muted">#{h.id}</td>
+                            <td className="font-bold">Cancha {h.canchaNumero || h.canchaId}</td>
+                            <td><span className="badge badge-disponible">{diasSemana[h.diaSemana] || `Día ${h.diaSemana}`}</span></td>
+                            <td>🕒 {h.horaApertura}</td>
+                            <td>🔒 {h.horaCierre}</td>
+                            {puedeGestionar && (
+                              <td>
+                                <button
+                                  type="button"
+                                  className="btn btn-danger btn-sm"
+                                  onClick={() => handleEliminarHorario(h.id)}
+                                  disabled={eliminarHorarioMutation.isPending}
+                                >
+                                  Eliminar
+                                </button>
+                              </td>
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </section>
@@ -1541,79 +1812,116 @@ export const ModulosHubPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* CREAR ARRIBA */}
-                {puedeGestionar && (
-                  <form onSubmit={handleCrearMantenimiento} className="form-card" style={{ marginBottom: '1.75rem', maxWidth: '100%' }}>
-                    <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-lg)', color: 'var(--color-primary)' }}>
-                      ➕ Registrar Mantenimiento Técnico
-                    </h3>
-                    {errorMantenimiento && <div className="alert alert-danger" role="alert" style={{ marginBottom: '1rem' }}>{errorMantenimiento}</div>}
-                    {exitoMantenimiento && <div className="alert alert-success" role="alert" style={{ marginBottom: '1rem' }}>{exitoMantenimiento}</div>}
-                    <div className="filters-grid" style={{ marginBottom: '1rem' }}>
-                      <div className="form-group">
-                        <label htmlFor="mant-cancha">Cancha *</label>
-                        <select id="mant-cancha" value={mantenimientoCanchaId || (canchasQuery.data?.[0]?.id ?? 0)} onChange={(e) => setMantenimientoCanchaId(Number(e.target.value))}>
-                          {canchasQuery.data?.map((c) => (
-                            <option key={c.id} value={c.id}>Cancha #{c.numero} ({c.tipoCanchaNombre} - {c.sedeNombre})</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="mant-trabajador">Técnico Asignado *</label>
-                        <select id="mant-trabajador" value={mantenimientoTrabajadorId || (trabajadoresQuery.data?.[0]?.id ?? 0)} onChange={(e) => setMantenimientoTrabajadorId(Number(e.target.value))}>
-                          {trabajadoresQuery.data?.map((t) => (
-                            <option key={t.id} value={t.id}>{t.nombre} ({t.cargo})</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="mant-inicio">Fecha de Inicio *</label>
-                        <input id="mant-inicio" type="datetime-local" value={mantenimientoInicio} onChange={(e) => setMantenimientoInicio(e.target.value)} required />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="mant-fin">Fecha de Fin (Opcional)</label>
-                        <input id="mant-fin" type="datetime-local" value={mantenimientoFin} onChange={(e) => setMantenimientoFin(e.target.value)} />
-                      </div>
-                    </div>
-                    <div className="form-group" style={{ marginBottom: '1rem' }}>
-                      <label htmlFor="mant-desc">Descripción del Mantenimiento *</label>
-                      <textarea id="mant-desc" rows={2} placeholder="Detalla los trabajos o reparaciones..." value={mantenimientoDescripcion} onChange={(e) => setMantenimientoDescripcion(e.target.value)} required />
-                    </div>
-                    <div className="form-actions">
-                      <button type="submit" className="btn btn-primary btn-sm" disabled={crearMantenimientoMutation.isPending}>
-                        {crearMantenimientoMutation.isPending ? 'Guardando...' : 'Registrar Mantenimiento'}
-                      </button>
-                    </div>
-                  </form>
-                )}
-
-                {/* LISTA ABAJO */}
-                <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-md)', borderTop: '1px solid var(--color-border)', paddingTop: '1.25rem' }}>
-                  📋 Bitácora de Órdenes Técnicas ({mantenimientosQuery.data?.length ?? 0})
-                </h3>
-
                 {!puedeGestionar ? (
-                  <div className="alert alert-warning">Privilegios requeridos (Trabajador o Administrador).</div>
-                ) : mantenimientosQuery.isLoading ? (
-                  <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando bitácora...</span></div>
-                ) : mantenimientosQuery.data && mantenimientosQuery.data.length > 0 ? (
-                  <div className="cards-grid">
-                    {mantenimientosQuery.data.map((m) => (
-                      <article key={m.id} className="cancha-card">
-                        <header className="card-header">
-                          <div><span className="card-id-tag">ID #{m.id}</span><h3>Cancha {m.canchaNumero || m.canchaId}</h3></div>
-                          <span className="badge badge-mantenimiento">Mantenimiento</span>
-                        </header>
-                        <div className="card-body">
-                          <p><strong>Descripción:</strong> {m.descripcion}</p>
-                          <p>👷 <strong>Técnico:</strong> {m.trabajadorNombre || `ID #${m.trabajadorId}`}</p>
-                          <p>📅 <strong>Inicio:</strong> {new Date(m.fechaInicio).toLocaleDateString('es-CL')}</p>
-                        </div>
-                      </article>
-                    ))}
+                  <div className="alert alert-info" role="alert">
+                    ℹ️ El módulo de mantenimientos técnicos está reservado para Trabajadores y Administradores.
                   </div>
                 ) : (
-                  <div className="empty-state"><span className="empty-icon">🔧</span><h3>Sin mantenimientos programados</h3></div>
+                  <>
+                    {/* CREAR ARRIBA */}
+                    <form onSubmit={handleCrearMantenimiento} className="form-card" style={{ marginBottom: '1.75rem', maxWidth: '100%' }}>
+                      <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-lg)', color: 'var(--color-primary)' }}>
+                        ➕ Registrar Mantenimiento Técnico
+                      </h3>
+                      {errorMantenimiento && <div className="alert alert-danger" role="alert" style={{ marginBottom: '1rem' }}>{errorMantenimiento}</div>}
+                      {exitoMantenimiento && <div className="alert alert-success" role="alert" style={{ marginBottom: '1rem' }}>{exitoMantenimiento}</div>}
+                      <div className="filters-grid" style={{ marginBottom: '1rem' }}>
+                        <div className="form-group">
+                          <label htmlFor="mant-cancha">Cancha a Intervenir *</label>
+                          <select id="mant-cancha" value={mantenimientoCanchaId || (canchasQuery.data?.[0]?.id ?? 0)} onChange={(e) => setMantenimientoCanchaId(Number(e.target.value))}>
+                            {canchasQuery.data?.map((c) => (
+                              <option key={c.id} value={c.id}>Cancha #{c.numero} ({c.tipoCanchaNombre} - {c.sedeNombre})</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="mant-trabajador">Encargado Técnico *</label>
+                          <select id="mant-trabajador" value={mantenimientoTrabajadorId || (trabajadoresQuery.data?.[0]?.id ?? 0)} onChange={(e) => setMantenimientoTrabajadorId(Number(e.target.value))}>
+                            {trabajadoresQuery.data?.map((t) => (
+                              <option key={t.id} value={t.id}>{t.usuarioNombre || t.nombre || `Personal #${t.id}`} ({t.cargo})</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="mant-inicio">Fecha Inicio *</label>
+                          <input id="mant-inicio" type="datetime-local" value={mantenimientoInicio} onChange={(e) => setMantenimientoInicio(e.target.value)} required />
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="mant-fin">Fecha Término Estimada</label>
+                          <input id="mant-fin" type="datetime-local" value={mantenimientoFin} onChange={(e) => setMantenimientoFin(e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="form-group" style={{ marginBottom: '1rem' }}>
+                        <label htmlFor="mant-desc">Descripción del Trabajo Técnico *</label>
+                        <textarea id="mant-desc" rows={2} placeholder="Reparación de césped, nivelación de cancha, revisión de luces..." value={mantenimientoDescripcion} onChange={(e) => setMantenimientoDescripcion(e.target.value)} required />
+                      </div>
+                      <div className="form-actions">
+                        <button type="submit" className="btn btn-primary btn-sm" disabled={crearMantenimientoMutation.isPending}>
+                          {crearMantenimientoMutation.isPending ? 'Guardando...' : 'Crear Orden Técnica'}
+                        </button>
+                      </div>
+                    </form>
+
+                    {/* LISTA ABAJO */}
+                    <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-md)', borderTop: '1px solid var(--color-border)', paddingTop: '1.25rem' }}>
+                      📋 Bitácora de Mantenimientos ({mantenimientosQuery.data?.length ?? 0})
+                    </h3>
+
+                    {mantenimientosQuery.isLoading && (
+                      <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando mantenimientos...</span></div>
+                    )}
+                    {mantenimientosQuery.isError && (
+                      <div className="alert alert-danger" role="alert">⚠️ No se pudo obtener la bitácora de mantenimientos.</div>
+                    )}
+                    {mantenimientosQuery.data && mantenimientosQuery.data.length === 0 && !mantenimientosQuery.isLoading && (
+                      <div className="empty-state">
+                        <span className="empty-icon">🔧</span>
+                        <h3>No hay mantenimientos activos</h3>
+                        <p className="text-muted">Registra intervenciones técnicas o revisiones preventivas arriba.</p>
+                      </div>
+                    )}
+                    {mantenimientosQuery.data && mantenimientosQuery.data.length > 0 && (
+                      <div className="table-responsive">
+                        <table className="data-table" aria-label="Tabla de Mantenimientos">
+                          <thead>
+                            <tr>
+                              <th scope="col">ID</th>
+                              <th scope="col">Cancha</th>
+                              <th scope="col">Encargado</th>
+                              <th scope="col">Descripción</th>
+                              <th scope="col">Inicio</th>
+                              <th scope="col">Fin</th>
+                              {esAdmin && <th scope="col">Acciones</th>}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {mantenimientosQuery.data.map((m) => (
+                              <tr key={m.id}>
+                                <td className="font-mono text-muted">#{m.id}</td>
+                                <td className="font-bold">Cancha {m.canchaNumero || m.canchaId}</td>
+                                <td>{m.trabajadorNombre || `Técnico #${m.trabajadorId}`}</td>
+                                <td>{m.descripcion}</td>
+                                <td>{new Date(m.fechaInicio).toLocaleDateString('es-CL')}</td>
+                                <td>{m.fechaFin ? new Date(m.fechaFin).toLocaleDateString('es-CL') : 'En progreso'}</td>
+                                {esAdmin && (
+                                  <td>
+                                    <button
+                                      type="button"
+                                      className="btn btn-danger btn-sm"
+                                      onClick={() => handleEliminarMantenimiento(m.id)}
+                                      disabled={eliminarMantenimientoMutation.isPending}
+                                    >
+                                      Eliminar
+                                    </button>
+                                  </td>
+                                )}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </>
                 )}
               </section>
             )}
@@ -1674,18 +1982,45 @@ export const ModulosHubPage: React.FC = () => {
                 {resenasQuery.isLoading && (
                   <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando opiniones...</span></div>
                 )}
+                {resenasQuery.isError && (
+                  <div className="alert alert-danger" role="alert">⚠️ Error al cargar las opiniones de los usuarios.</div>
+                )}
+                {resenasQuery.data && resenasQuery.data.length === 0 && !resenasQuery.isLoading && (
+                  <div className="empty-state">
+                    <span className="empty-icon">⭐</span>
+                    <h3>Aún no se han publicado reseñas</h3>
+                    <p className="text-muted">¡Sé el primero en calificar tu experiencia deportiva arriba!</p>
+                  </div>
+                )}
                 {resenasQuery.data && resenasQuery.data.length > 0 && (
                   <div className="cards-grid">
                     {resenasQuery.data.map((r) => (
                       <article key={r.id} className="cancha-card">
                         <header className="card-header">
-                          <div><span className="card-id-tag font-mono">ID #{r.id}</span><h3>{r.usuarioNombre || 'Cliente'}</h3></div>
-                          <span className="badge badge-administrador">{'★'.repeat(r.calificacion)}{'☆'.repeat(5 - r.calificacion)}</span>
+                          <div>
+                            <span className="card-id-tag font-mono">ID #{r.id}</span>
+                            <h3>{r.usuarioNombre || 'Cliente'}</h3>
+                          </div>
+                          <span className="badge badge-primary">
+                            {'★'.repeat(r.calificacion)}{'☆'.repeat(5 - r.calificacion)}
+                          </span>
                         </header>
                         <div className="card-body">
                           <p className="resena-comment">"{r.comentario || 'Sin comentario escrito.'}"</p>
                           <p className="text-muted text-xs">Cancha {r.canchaNumero || r.canchaId} | {new Date(r.fecha).toLocaleDateString('es-CL')}</p>
                         </div>
+                        {puedeGestionar && (
+                          <footer className="card-footer" style={{ marginTop: '0.75rem' }}>
+                            <button
+                              type="button"
+                              className="btn btn-danger btn-sm"
+                              onClick={() => handleEliminarResena(r.id)}
+                              disabled={eliminarResenaMutation.isPending}
+                            >
+                              Eliminar Reseña
+                            </button>
+                          </footer>
+                        )}
                       </article>
                     ))}
                   </div>
@@ -1733,23 +2068,43 @@ export const ModulosHubPage: React.FC = () => {
 
                 {/* LISTA ABAJO */}
                 <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-md)', borderTop: '1px solid var(--color-border)', paddingTop: '1.25rem' }}>
-                  📋 Bandeja de Notificaciones Registradas ({notificacionesQuery.data?.length ?? 0})
+                  📋 Bandeja de Notificaciones ({notificacionesQuery.data?.length ?? 0})
                 </h3>
 
                 {notificacionesQuery.isLoading && (
                   <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando notificaciones...</span></div>
                 )}
+                {notificacionesQuery.isError && (
+                  <div className="alert alert-danger" role="alert">⚠️ Error al cargar las notificaciones.</div>
+                )}
+                {notificacionesQuery.data && notificacionesQuery.data.length === 0 && !notificacionesQuery.isLoading && (
+                  <div className="empty-state">
+                    <span className="empty-icon">🔔</span>
+                    <h3>No hay notificaciones en la bandeja</h3>
+                    <p className="text-muted">Los avisos enviados aparecerán listados aquí.</p>
+                  </div>
+                )}
                 {notificacionesQuery.data && notificacionesQuery.data.length > 0 && (
                   <div className="notifications-list">
                     {notificacionesQuery.data.map((n) => (
-                      <div key={n.id} className={`notification-item ${n.leido ? 'read' : 'unread'}`}>
+                      <div key={n.id} className={`notification-item ${n.leido ? 'read' : 'unread'}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div className="notification-content">
                           <p className="notification-message">{n.mensaje}</p>
                           <span className="notification-date text-muted text-xs">{new Date(n.fechaEnvio).toLocaleString('es-CL')}</span>
                         </div>
-                        <span className={`badge ${n.leido ? 'badge-fuera-de-servicio' : 'badge-disponible'}`}>
-                          {n.leido ? 'Leída' : 'Nueva'}
-                        </span>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <span className={`badge ${n.leido ? 'badge-fuera-de-servicio' : 'badge-disponible'}`}>
+                            {n.leido ? 'Leída' : 'Nueva'}
+                          </span>
+                          <button
+                            type="button"
+                            className="btn btn-danger btn-sm"
+                            onClick={() => handleEliminarNotificacion(n.id)}
+                            disabled={eliminarNotificacionMutation.isPending}
+                          >
+                            Eliminar
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1758,7 +2113,7 @@ export const ModulosHubPage: React.FC = () => {
             )}
 
             {/* 11. TRABAJADORES (Admin Only) */}
-            {tabActiva === 'trabajadores' && esAdmin && (
+            {tabActiva === 'trabajadores' && (
               <section id="panel-trabajadores" role="tabpanel" aria-labelledby="tab-trabajadores">
                 <div className="section-title-bar">
                   <div>
@@ -1767,82 +2122,115 @@ export const ModulosHubPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* CREAR ARRIBA */}
-                <form onSubmit={handleCrearTrabajador} className="form-card" style={{ marginBottom: '1.75rem', maxWidth: '100%' }}>
-                  <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-lg)', color: 'var(--color-primary)' }}>
-                    ➕ Asignar Rol de Trabajador
-                  </h3>
-                  {errorTrabajador && <div className="alert alert-danger" role="alert" style={{ marginBottom: '1rem' }}>{errorTrabajador}</div>}
-                  {exitoTrabajador && <div className="alert alert-success" role="alert" style={{ marginBottom: '1rem' }}>{exitoTrabajador}</div>}
-                  <div className="filters-grid" style={{ marginBottom: '1rem' }}>
-                    <div className="form-group">
-                      <label htmlFor="trab-usuario">Usuario *</label>
-                      <select id="trab-usuario" value={trabajadorUsuarioId || (usuariosQuery.data?.[0]?.id ?? 0)} onChange={(e) => setTrabajadorUsuarioId(Number(e.target.value))}>
-                        {usuariosQuery.data?.map((u) => (
-                          <option key={u.id} value={u.id}>{u.nombre} ({u.email}) [{u.rol}]</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="trab-cargo">Cargo Asignado *</label>
-                      <input id="trab-cargo" type="text" placeholder="Ej. Supervisor de Canchas" value={trabajadorCargo} onChange={(e) => setTrabajadorCargo(e.target.value)} required />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="trab-turno">Turno Laboral *</label>
-                      <select id="trab-turno" value={trabajadorTurno} onChange={(e) => setTrabajadorTurno(e.target.value)}>
-                        <option value="Mañana">Mañana (08:00 - 16:00)</option>
-                        <option value="Tarde">Tarde (16:00 - 00:00)</option>
-                        <option value="Noche">Noche (00:00 - 08:00)</option>
-                        <option value="Rotativo">Turno Rotativo</option>
-                      </select>
-                    </div>
+                {!esAdmin ? (
+                  <div className="alert alert-info" role="alert">
+                    ℹ️ El módulo de trabajadores está reservado para cuentas con rol de Administrador.
                   </div>
-                  <div className="form-actions">
-                    <button type="submit" className="btn btn-primary btn-sm" disabled={crearTrabajadorMutation.isPending}>
-                      {crearTrabajadorMutation.isPending ? 'Guardando...' : 'Asignar Trabajador'}
-                    </button>
-                  </div>
-                </form>
+                ) : (
+                  <>
+                    {/* CREAR ARRIBA */}
+                    <form onSubmit={handleCrearTrabajador} className="form-card" style={{ marginBottom: '1.75rem', maxWidth: '100%' }}>
+                      <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-lg)', color: 'var(--color-primary)' }}>
+                        ➕ Asignar Rol de Trabajador
+                      </h3>
+                      {errorTrabajador && <div className="alert alert-danger" role="alert" style={{ marginBottom: '1rem' }}>{errorTrabajador}</div>}
+                      {exitoTrabajador && <div className="alert alert-success" role="alert" style={{ marginBottom: '1rem' }}>{exitoTrabajador}</div>}
+                      <div className="filters-grid" style={{ marginBottom: '1rem' }}>
+                        <div className="form-group">
+                          <label htmlFor="trab-usuario">Usuario *</label>
+                          <select id="trab-usuario" value={trabajadorUsuarioId || (usuariosQuery.data?.[0]?.id ?? 0)} onChange={(e) => setTrabajadorUsuarioId(Number(e.target.value))}>
+                            {usuariosQuery.data?.map((u) => (
+                              <option key={u.id} value={u.id}>{u.nombre} ({u.email}) [{u.rol}]</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="trab-cargo">Cargo Asignado *</label>
+                          <input id="trab-cargo" type="text" placeholder="Ej. Supervisor de Canchas" value={trabajadorCargo} onChange={(e) => setTrabajadorCargo(e.target.value)} required />
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="trab-turno">Turno Laboral *</label>
+                          <select id="trab-turno" value={trabajadorTurno} onChange={(e) => setTrabajadorTurno(e.target.value)}>
+                            <option value="Mañana">Mañana (08:00 - 16:00)</option>
+                            <option value="Tarde">Tarde (16:00 - 00:00)</option>
+                            <option value="Noche">Noche (00:00 - 08:00)</option>
+                            <option value="Rotativo">Turno Rotativo</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="form-actions">
+                        <button type="submit" className="btn btn-primary btn-sm" disabled={crearTrabajadorMutation.isPending}>
+                          {crearTrabajadorMutation.isPending ? 'Guardando...' : 'Asignar Trabajador'}
+                        </button>
+                      </div>
+                    </form>
 
-                {/* LISTA ABAJO */}
-                <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-md)', borderTop: '1px solid var(--color-border)', paddingTop: '1.25rem' }}>
-                  📋 Equipo de Trabajadores Registrados ({trabajadoresQuery.data?.length ?? 0})
-                </h3>
+                    {/* LISTA ABAJO */}
+                    <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-md)', borderTop: '1px solid var(--color-border)', paddingTop: '1.25rem' }}>
+                      📋 Equipo de Trabajadores Registrados ({trabajadoresQuery.data?.length ?? 0})
+                    </h3>
 
-                {trabajadoresQuery.isLoading && (
-                  <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando personal...</span></div>
-                )}
-                {trabajadoresQuery.data && (
-                  <div className="table-responsive">
-                    <table className="data-table" aria-label="Tabla de Trabajadores">
-                      <thead>
-                        <tr>
-                          <th scope="col">ID</th>
-                          <th scope="col">Nombre</th>
-                          <th scope="col">Email</th>
-                          <th scope="col">Cargo</th>
-                          <th scope="col">Turno</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {trabajadoresQuery.data.map((t) => (
-                          <tr key={t.id}>
-                            <td className="font-mono text-muted">#{t.id}</td>
-                            <td className="font-bold">{t.nombre || 'Personal'}</td>
-                            <td>{t.email || '—'}</td>
-                            <td><span className="badge badge-trabajador">{t.cargo}</span></td>
-                            <td>{t.turno}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                    {trabajadoresQuery.isLoading && (
+                      <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando personal...</span></div>
+                    )}
+                    {trabajadoresQuery.isError && (
+                      <div className="alert alert-danger" role="alert">⚠️ Error al cargar el listado de personal operativo.</div>
+                    )}
+                    {trabajadoresQuery.data && trabajadoresQuery.data.length === 0 && !trabajadoresQuery.isLoading && (
+                      <div className="empty-state">
+                        <span className="empty-icon">👷</span>
+                        <h3>No hay personal registrado</h3>
+                        <p className="text-muted">Asigna cargos a los usuarios registrados arriba.</p>
+                      </div>
+                    )}
+                    {trabajadoresQuery.data && trabajadoresQuery.data.length > 0 && (
+                      <div className="table-responsive">
+                        <table className="data-table" aria-label="Tabla de Trabajadores">
+                          <thead>
+                            <tr>
+                              <th scope="col">ID</th>
+                              <th scope="col">Nombre</th>
+                              <th scope="col">Email</th>
+                              <th scope="col">Cargo</th>
+                              <th scope="col">Turno</th>
+                              <th scope="col">Acciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {trabajadoresQuery.data.map((t) => {
+                              const nombreMostrar = t.usuarioNombre || t.nombre || `Personal #${t.id}`;
+                              const emailMostrar = t.usuarioEmail || t.email || '—';
+                              return (
+                                <tr key={t.id}>
+                                  <td className="font-mono text-muted">#{t.id}</td>
+                                  <td className="font-bold">{nombreMostrar}</td>
+                                  <td>{emailMostrar}</td>
+                                  <td><span className="badge badge-trabajador">{t.cargo}</span></td>
+                                  <td>{t.turno}</td>
+                                  <td>
+                                    <button
+                                      type="button"
+                                      className="btn btn-danger btn-sm"
+                                      onClick={() => handleEliminarTrabajador(t.id, nombreMostrar)}
+                                      disabled={eliminarTrabajadorMutation.isPending}
+                                    >
+                                      Remover
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </>
                 )}
               </section>
             )}
 
             {/* 12. USUARIOS (Admin Only) */}
-            {tabActiva === 'usuarios' && esAdmin && (
+            {tabActiva === 'usuarios' && (
               <section id="panel-usuarios" role="tabpanel" aria-labelledby="tab-usuarios">
                 <div className="section-title-bar">
                   <div>
@@ -1851,75 +2239,104 @@ export const ModulosHubPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* CREAR ARRIBA */}
-                <form onSubmit={handleCrearUsuario} className="form-card" style={{ marginBottom: '1.75rem', maxWidth: '100%' }}>
-                  <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-lg)', color: 'var(--color-primary)' }}>
-                    ➕ Registrar Nuevo Usuario
-                  </h3>
-                  {errorUsuario && <div className="alert alert-danger" role="alert" style={{ marginBottom: '1rem' }}>{errorUsuario}</div>}
-                  {exitoUsuario && <div className="alert alert-success" role="alert" style={{ marginBottom: '1rem' }}>{exitoUsuario}</div>}
-                  <div className="filters-grid" style={{ marginBottom: '1rem' }}>
-                    <div className="form-group">
-                      <label htmlFor="usr-nombre">Nombre Completo *</label>
-                      <input id="usr-nombre" type="text" placeholder="Ej. Juan Pérez" value={usuarioNombre} onChange={(e) => setUsuarioNombre(e.target.value)} required />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="usr-email">Correo Electrónico *</label>
-                      <input id="usr-email" type="email" placeholder="usuario@canchas.cl" value={usuarioEmail} onChange={(e) => setUsuarioEmail(e.target.value)} required />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="usr-password">Contraseña (Mínimo 8 car.) *</label>
-                      <input id="usr-password" type="password" placeholder="••••••••" value={usuarioPassword} onChange={(e) => setUsuarioPassword(e.target.value)} required />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="usr-rol">Rol en el Sistema *</label>
-                      <select id="usr-rol" value={usuarioRol} onChange={(e) => setUsuarioRol(e.target.value)}>
-                        <option value="Cliente">Cliente</option>
-                        <option value="Trabajador">Trabajador</option>
-                        <option value="Administrador">Administrador</option>
-                      </select>
-                    </div>
+                {!esAdmin ? (
+                  <div className="alert alert-info" role="alert">
+                    ℹ️ El directorio de usuarios está reservado para cuentas con rol de Administrador.
                   </div>
-                  <div className="form-actions">
-                    <button type="submit" className="btn btn-primary btn-sm" disabled={crearUsuarioMutation.isPending}>
-                      {crearUsuarioMutation.isPending ? 'Guardando...' : 'Crear Usuario'}
-                    </button>
-                  </div>
-                </form>
+                ) : (
+                  <>
+                    {/* CREAR ARRIBA */}
+                    <form onSubmit={handleCrearUsuario} className="form-card" style={{ marginBottom: '1.75rem', maxWidth: '100%' }}>
+                      <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-lg)', color: 'var(--color-primary)' }}>
+                        ➕ Registrar Nuevo Usuario
+                      </h3>
+                      {errorUsuario && <div className="alert alert-danger" role="alert" style={{ marginBottom: '1rem' }}>{errorUsuario}</div>}
+                      {exitoUsuario && <div className="alert alert-success" role="alert" style={{ marginBottom: '1rem' }}>{exitoUsuario}</div>}
+                      <div className="filters-grid" style={{ marginBottom: '1rem' }}>
+                        <div className="form-group">
+                          <label htmlFor="usr-nombre">Nombre Completo *</label>
+                          <input id="usr-nombre" type="text" placeholder="Ej. Juan Pérez" value={usuarioNombre} onChange={(e) => setUsuarioNombre(e.target.value)} required />
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="usr-email">Correo Electrónico *</label>
+                          <input id="usr-email" type="email" placeholder="usuario@canchas.cl" value={usuarioEmail} onChange={(e) => setUsuarioEmail(e.target.value)} required />
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="usr-password">Contraseña (Mínimo 8 car.) *</label>
+                          <input id="usr-password" type="password" placeholder="••••••••" value={usuarioPassword} onChange={(e) => setUsuarioPassword(e.target.value)} required />
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="usr-rol">Rol en el Sistema *</label>
+                          <select id="usr-rol" value={usuarioRol} onChange={(e) => setUsuarioRol(e.target.value)}>
+                            <option value="Cliente">Cliente</option>
+                            <option value="Trabajador">Trabajador</option>
+                            <option value="Administrador">Administrador</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="form-actions">
+                        <button type="submit" className="btn btn-primary btn-sm" disabled={crearUsuarioMutation.isPending}>
+                          {crearUsuarioMutation.isPending ? 'Guardando...' : 'Crear Usuario'}
+                        </button>
+                      </div>
+                    </form>
 
-                {/* LISTA ABAJO */}
-                <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-md)', borderTop: '1px solid var(--color-border)', paddingTop: '1.25rem' }}>
-                  📋 Directorio de Usuarios Registrados ({usuariosQuery.data?.length ?? 0})
-                </h3>
+                    {/* LISTA ABAJO */}
+                    <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-md)', borderTop: '1px solid var(--color-border)', paddingTop: '1.25rem' }}>
+                      📋 Directorio de Usuarios Registrados ({usuariosQuery.data?.length ?? 0})
+                    </h3>
 
-                {usuariosQuery.isLoading && (
-                  <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando usuarios...</span></div>
-                )}
-                {usuariosQuery.data && (
-                  <div className="table-responsive">
-                    <table className="data-table" aria-label="Tabla de Usuarios">
-                      <thead>
-                        <tr>
-                          <th scope="col">ID</th>
-                          <th scope="col">Nombre</th>
-                          <th scope="col">Email</th>
-                          <th scope="col">Rol</th>
-                          <th scope="col">Registro</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {usuariosQuery.data.map((u) => (
-                          <tr key={u.id}>
-                            <td className="font-mono text-muted">#{u.id}</td>
-                            <td className="font-bold">{u.nombre}</td>
-                            <td>{u.email}</td>
-                            <td><span className={`badge badge-${u.rol.toLowerCase()}`}>{u.rol}</span></td>
-                            <td>{new Date(u.fechaCreacion).toLocaleDateString('es-CL')}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                    {usuariosQuery.isLoading && (
+                      <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando usuarios...</span></div>
+                    )}
+                    {usuariosQuery.isError && (
+                      <div className="alert alert-danger" role="alert">⚠️ Error al cargar el directorio de usuarios.</div>
+                    )}
+                    {usuariosQuery.data && usuariosQuery.data.length === 0 && !usuariosQuery.isLoading && (
+                      <div className="empty-state">
+                        <span className="empty-icon">👥</span>
+                        <h3>No hay usuarios registrados</h3>
+                        <p className="text-muted">Crea una cuenta en el formulario de arriba.</p>
+                      </div>
+                    )}
+                    {usuariosQuery.data && usuariosQuery.data.length > 0 && (
+                      <div className="table-responsive">
+                        <table className="data-table" aria-label="Tabla de Usuarios">
+                          <thead>
+                            <tr>
+                              <th scope="col">ID</th>
+                              <th scope="col">Nombre</th>
+                              <th scope="col">Email</th>
+                              <th scope="col">Rol</th>
+                              <th scope="col">Registro</th>
+                              <th scope="col">Acciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {usuariosQuery.data.map((u) => (
+                              <tr key={u.id}>
+                                <td className="font-mono text-muted">#{u.id}</td>
+                                <td className="font-bold">{u.nombre}</td>
+                                <td>{u.email}</td>
+                                <td><span className={`badge badge-${u.rol.toLowerCase()}`}>{u.rol}</span></td>
+                                <td>{new Date(u.fechaCreacion).toLocaleDateString('es-CL')}</td>
+                                <td>
+                                  <button
+                                    type="button"
+                                    className="btn btn-danger btn-sm"
+                                    onClick={() => handleEliminarUsuario(u.id, u.nombre)}
+                                    disabled={eliminarUsuarioMutation.isPending}
+                                  >
+                                    Eliminar
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </>
                 )}
               </section>
             )}

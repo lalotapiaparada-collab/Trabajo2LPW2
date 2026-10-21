@@ -42,6 +42,10 @@ export const modulosService = {
     return SedeResponseSchema.parse(response.data);
   },
 
+  async eliminarSede(id: number): Promise<void> {
+    await httpClient.delete(`/api/v1/sedes/${id}`);
+  },
+
   // Reservas
   async listarReservas(): Promise<ReservaResponse[]> {
     const response = await httpClient.get('/api/v1/reservas');
@@ -61,6 +65,10 @@ export const modulosService = {
     return ReservaResponseSchema.parse(response.data);
   },
 
+  async eliminarReserva(id: number): Promise<void> {
+    await httpClient.delete(`/api/v1/reservas/${id}`);
+  },
+
   // Pagos
   async listarPagos(): Promise<PagoResponse[]> {
     const response = await httpClient.get('/api/v1/pagos');
@@ -78,6 +86,10 @@ export const modulosService = {
     return PagoResponseSchema.parse(response.data);
   },
 
+  async eliminarPago(id: number): Promise<void> {
+    await httpClient.delete(`/api/v1/pagos/${id}`);
+  },
+
   // Comprobantes
   async listarComprobantes(): Promise<ComprobanteResponse[]> {
     const response = await httpClient.get('/api/v1/comprobantes');
@@ -93,6 +105,10 @@ export const modulosService = {
   }): Promise<ComprobanteResponse> {
     const response = await httpClient.post('/api/v1/comprobantes', datos);
     return ComprobanteResponseSchema.parse(response.data);
+  },
+
+  async eliminarComprobante(id: number): Promise<void> {
+    await httpClient.delete(`/api/v1/comprobantes/${id}`);
   },
 
   // Mantenimientos
@@ -114,6 +130,10 @@ export const modulosService = {
     return MantenimientoResponseSchema.parse(response.data);
   },
 
+  async eliminarMantenimiento(id: number): Promise<void> {
+    await httpClient.delete(`/api/v1/mantenimientos/${id}`);
+  },
+
   // Reseñas
   async listarResenas(): Promise<ResenaResponse[]> {
     const response = await httpClient.get('/api/v1/resenas');
@@ -129,6 +149,10 @@ export const modulosService = {
   }): Promise<ResenaResponse> {
     const response = await httpClient.post('/api/v1/resenas', datos);
     return ResenaResponseSchema.parse(response.data);
+  },
+
+  async eliminarResena(id: number): Promise<void> {
+    await httpClient.delete(`/api/v1/resenas/${id}`);
   },
 
   // Notificaciones
@@ -147,6 +171,10 @@ export const modulosService = {
     return NotificacionResponseSchema.parse(response.data);
   },
 
+  async eliminarNotificacion(id: number): Promise<void> {
+    await httpClient.delete(`/api/v1/notificaciones/${id}`);
+  },
+
   // Trabajadores
   async listarTrabajadores(): Promise<TrabajadorResponse[]> {
     const response = await httpClient.get('/api/v1/trabajadores');
@@ -162,6 +190,10 @@ export const modulosService = {
   }): Promise<TrabajadorResponse> {
     const response = await httpClient.post('/api/v1/trabajadores', datos);
     return TrabajadorResponseSchema.parse(response.data);
+  },
+
+  async eliminarTrabajador(id: number): Promise<void> {
+    await httpClient.delete(`/api/v1/trabajadores/${id}`);
   },
 
   // Usuarios
@@ -182,6 +214,10 @@ export const modulosService = {
     return UsuarioResponseSchema.parse(response.data);
   },
 
+  async eliminarUsuario(id: number): Promise<void> {
+    await httpClient.delete(`/api/v1/usuarios/${id}`);
+  },
+
   // Horarios
   async listarHorarios(): Promise<HorarioResponse[]> {
     const response = await httpClient.get('/api/v1/horarios');
@@ -198,5 +234,9 @@ export const modulosService = {
   }): Promise<HorarioResponse> {
     const response = await httpClient.post('/api/v1/horarios', datos);
     return HorarioResponseSchema.parse(response.data);
+  },
+
+  async eliminarHorario(id: number): Promise<void> {
+    await httpClient.delete(`/api/v1/horarios/${id}`);
   },
 };

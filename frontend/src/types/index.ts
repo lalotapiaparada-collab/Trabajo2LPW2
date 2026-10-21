@@ -180,6 +180,8 @@ export type NotificacionResponse = z.infer<typeof NotificacionResponseSchema>;
 export const TrabajadorResponseSchema = z.object({
   id: z.number(),
   usuarioId: z.number(),
+  usuarioNombre: z.string().optional().nullable(),
+  usuarioEmail: z.string().optional().nullable(),
   nombre: z.string().optional().nullable(),
   email: z.string().optional().nullable(),
   cargo: z.string(),

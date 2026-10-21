@@ -20,6 +20,17 @@ export const useCrearSede = () => {
   });
 };
 
+export const useEliminarSede = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => modulosService.eliminarSede(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sedes-modulo'] });
+      queryClient.invalidateQueries({ queryKey: ['sedes'] });
+    },
+  });
+};
+
 // Reservas
 export const useReservasList = () =>
   useQuery({
@@ -37,6 +48,16 @@ export const useCrearReserva = () => {
       usuarioId?: number;
       trabajadorId?: number;
     }) => modulosService.crearReserva(datos),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reservas'] });
+    },
+  });
+};
+
+export const useEliminarReserva = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => modulosService.eliminarReserva(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reservas'] });
     },
@@ -62,6 +83,16 @@ export const useCrearPago = () => {
   });
 };
 
+export const useEliminarPago = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => modulosService.eliminarPago(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pagos'] });
+    },
+  });
+};
+
 // Comprobantes
 export const useComprobantesList = () =>
   useQuery({
@@ -74,6 +105,16 @@ export const useCrearComprobante = () => {
   return useMutation({
     mutationFn: (datos: { pagoId: number; numeroComprobante: string; tipo: string }) =>
       modulosService.crearComprobante(datos),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['comprobantes'] });
+    },
+  });
+};
+
+export const useEliminarComprobante = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => modulosService.eliminarComprobante(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['comprobantes'] });
     },
@@ -104,6 +145,17 @@ export const useCrearMantenimiento = () => {
   });
 };
 
+export const useEliminarMantenimiento = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => modulosService.eliminarMantenimiento(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['mantenimientos'] });
+      queryClient.invalidateQueries({ queryKey: ['canchas'] });
+    },
+  });
+};
+
 // Reseñas
 export const useResenasList = () =>
   useQuery({
@@ -122,6 +174,16 @@ export const useCrearResena = () => {
   });
 };
 
+export const useEliminarResena = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => modulosService.eliminarResena(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['resenas'] });
+    },
+  });
+};
+
 // Notificaciones
 export const useNotificacionesList = () =>
   useQuery({
@@ -134,6 +196,16 @@ export const useCrearNotificacion = () => {
   return useMutation({
     mutationFn: (datos: { usuarioId: number; mensaje: string }) =>
       modulosService.crearNotificacion(datos),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notificaciones'] });
+    },
+  });
+};
+
+export const useEliminarNotificacion = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => modulosService.eliminarNotificacion(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notificaciones'] });
     },
@@ -159,6 +231,17 @@ export const useCrearTrabajador = () => {
   });
 };
 
+export const useEliminarTrabajador = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => modulosService.eliminarTrabajador(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trabajadores'] });
+      queryClient.invalidateQueries({ queryKey: ['usuarios-modulo'] });
+    },
+  });
+};
+
 // Usuarios
 export const useUsuariosList = () =>
   useQuery({
@@ -171,6 +254,16 @@ export const useCrearUsuario = () => {
   return useMutation({
     mutationFn: (datos: { nombre: string; email: string; password: string; rol?: string }) =>
       modulosService.crearUsuario(datos),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['usuarios-modulo'] });
+    },
+  });
+};
+
+export const useEliminarUsuario = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => modulosService.eliminarUsuario(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios-modulo'] });
     },
@@ -193,6 +286,16 @@ export const useCrearHorario = () => {
       horaApertura: string;
       horaCierre: string;
     }) => modulosService.crearHorario(datos),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['horarios'] });
+    },
+  });
+};
+
+export const useEliminarHorario = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => modulosService.eliminarHorario(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['horarios'] });
     },

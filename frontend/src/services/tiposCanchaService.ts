@@ -18,4 +18,8 @@ export const tiposCanchaService = {
     const response = await httpClient.put(`/api/v1/tipos-cancha/${id}`, datos);
     return TipoCanchaResponseSchema.parse(response.data);
   },
+
+  async eliminarTipoCancha(id: number): Promise<void> {
+    await httpClient.delete(`/api/v1/tipos-cancha/${id}`);
+  },
 };
