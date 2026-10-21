@@ -255,3 +255,20 @@
 - **Corregido:** Se aseguraron contrastes y estados activos en los botones laterales y tarjetas métricas.
 - **Descartado:** No se requirieron cambios en endpoints backend.
 - **Comprendido y explicable:** Sí.
+
+
+---
+
+## Entrada 17 – Focalización en Módulos Rápidos y Arquitectura 'Crear Arriba / Listar Abajo'
+- **Fecha/hora:** 2026-10-20 21:50
+- **Prompt usado:** me gusto el tema de los modulos rapidos podriamos dejar solo eso y tener las listas en los modulos rapidos abajo de crear cada categoria
+- **Resultado:** Reestructuración de la navegación y la disposición de contenido para consolidar un flujo de trabajo ultra simplificado, intuitivo y uniforme:
+  1. **Simplificación Radical del Header (`Layout.tsx`):** Se eliminaron los enlaces dispersos y redundantes del menú superior (`Canchas`, `Nueva Cancha`, `Tipos de Cancha`), dejando exclusivamente el botón destacado **`⚡ Módulos Rápidos`** y el selector desplegable **`Ir a Categoría ▾`**, unificando el 100% de la navegación en un solo punto focal.
+  2. **Patrón Ergonómico 'Crear Arriba / Listar Abajo' (`ModulosHubPage.tsx`):** En los 12 módulos y categorías del sistema:
+     - **Arriba (Creación Inmediata):** Formulario interactivo visible y listo para usar (`➕ Registrar / Crear [Módulo]`), permitiendo ingresar datos sin abrir modales ni desplegables adicionales.
+     - **Abajo (Listas en Tiempo Real):** Directamente debajo del formulario se ubica la lista o tabla con los registros existentes (`📋 Lista de [Módulo] Registradas ([N])`), la cual se actualiza de manera reactiva instantáneamente tras guardar.
+  3. **Inclusión de Creación de Canchas y Tipos en el Hub:** Se incorporaron formularios y mutaciones directas para dar de alta canchas y tipos de cancha sin abandonar el centro de Módulos Rápidos.
+- **Aceptado:** Sí, arquitectura limpia, sin redundancias y con una experiencia de uso predecible y homogénea en toda la plataforma.
+- **Corregido:** Se preservaron los accesos de roles (RBAC) y la validación de campos en cada formulario superior.
+- **Descartado:** No se requirieron migraciones en backend.
+- **Comprendido y explicable:** Sí.

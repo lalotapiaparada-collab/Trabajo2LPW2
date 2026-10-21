@@ -41,7 +41,6 @@ export const Layout: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const esAdmin = usuario?.rol === 'Administrador';
-  const puedeGestionar = usuario?.rol === 'Trabajador' || esAdmin;
 
   const handleLogout = () => {
     logout();
@@ -88,7 +87,7 @@ export const Layout: React.FC = () => {
       <header className="app-header">
         <div className="header-container">
           <div className="brand">
-            <Link to="/" className="brand-logo" aria-label="Inicio - Sistema Reservas Canchas">
+            <Link to="/modulos" className="brand-logo" aria-label="Inicio - Sistema Reservas Canchas">
               <img src={colocoloLogo} alt="Escudo Oficial Colo-Colo" className="brand-crest" />
               <div className="brand-text-container">
                 <span className="brand-text">CanchasYa</span>
@@ -99,19 +98,17 @@ export const Layout: React.FC = () => {
 
           <nav className="main-nav" aria-label="Navegación principal">
             <ul>
+              {/* Acceso Principal y Único: Módulos Rápidos */}
               <li>
-                <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : '')}>
-                  Canchas
+                <NavLink
+                  to="/modulos"
+                  className={({ isActive }) => (isActive ? 'active' : '')}
+                >
+                  ⚡ Módulos Rápidos
                 </NavLink>
               </li>
 
-              <li>
-                <NavLink to="/modulos" className={({ isActive }) => (isActive ? 'active' : '')}>
-                  Módulos
-                </NavLink>
-              </li>
-
-              {/* Menú Desplegable Accesible de Módulos Rápidos */}
+              {/* Selector Rápido por Categorías y Módulos */}
               <li style={{ position: 'relative' }}>
                 <div className="modules-nav-dropdown" ref={dropdownRef}>
                   <button
@@ -120,12 +117,9 @@ export const Layout: React.FC = () => {
                     onClick={() => setMenuModulosAbierto((prev) => !prev)}
                     aria-expanded={menuModulosAbierto}
                     aria-haspopup="true"
-                    aria-label="Abrir menú de acceso rápido a todos los módulos"
+                    aria-label="Seleccionar categoría o módulo directo"
                   >
-                    <span>⚡ Módulos Rápidos</span>
-                    <span className="dropdown-caret" aria-hidden="true">
-                      {menuModulosAbierto ? '▲' : '▼'}
-                    </span>
+                    <span>Ir a Categoría ▾</span>
                   </button>
 
                   {menuModulosAbierto && (
@@ -157,21 +151,6 @@ export const Layout: React.FC = () => {
                   )}
                 </div>
               </li>
-
-              {puedeGestionar && (
-                <>
-                  <li>
-                    <NavLink to="/canchas/nueva" className={({ isActive }) => (isActive ? 'active' : '')}>
-                      Nueva Cancha
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/tipos-cancha" className={({ isActive }) => (isActive ? 'active' : '')}>
-                      Tipos de Cancha
-                    </NavLink>
-                  </li>
-                </>
-              )}
             </ul>
           </nav>
 
