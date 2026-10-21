@@ -98,7 +98,7 @@ export const Layout: React.FC = () => {
             </Link>
           </div>
 
-          <nav className="main-nav" aria-label="Navegación principal" style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+          <nav className="main-nav" aria-label="Navegación principal">
             <ul>
               {/* Acceso Principal a Módulos Rápidos en Inicio */}
               <li>

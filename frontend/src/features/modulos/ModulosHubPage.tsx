@@ -105,9 +105,12 @@ export const ModulosHubPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') as ModuloTab | null;
   const tabActiva: ModuloTab = tabParam && MODULOS_CONFIG.some((m) => m.id === tabParam) ? tabParam : 'canchas';
+  const moduloActivo = MODULOS_CONFIG.find((m) => m.id === tabActiva) || MODULOS_CONFIG[0];
+  const [sidebarMobileAbierto, setSidebarMobileAbierto] = useState<boolean>(false);
 
   const cambiarTab = (tab: ModuloTab) => {
     setSearchParams({ tab });
+    setSidebarMobileAbierto(false);
   };
 
   // Estados de filtrado del Hub
@@ -953,10 +956,34 @@ export const ModulosHubPage: React.FC = () => {
         )}
       </section>
 
+      {/* Selector Compacto en Dispositivos Móviles */}
+      <div className="modulos-mobile-toggle-wrap">
+        <button
+          type="button"
+          className="modulos-mobile-toggle-btn"
+          onClick={() => setSidebarMobileAbierto((prev) => !prev)}
+          aria-expanded={sidebarMobileAbierto}
+          aria-label="Abrir o cerrar selector de módulos"
+        >
+          <span className="modulos-mobile-toggle-left">
+            <span aria-hidden="true" className="modulos-mobile-toggle-icon">{moduloActivo.icono}</span>
+            <span className="modulos-mobile-toggle-title">
+              Módulo: <strong>{moduloActivo.nombre}</strong>
+            </span>
+            <span className="badge badge-neutral" style={{ fontSize: '0.75rem', padding: '0.1rem 0.45rem' }}>
+              {countsMap[tabActiva]}
+            </span>
+          </span>
+          <span className="modulos-mobile-toggle-action">
+            {sidebarMobileAbierto ? '▲ Ocultar lista' : '▼ Cambiar (12)'}
+          </span>
+        </button>
+      </div>
+
       {/* Disposición Ergonómica de Dos Columnas */}
       <div className="modulos-hub-layout">
         {/* Barra Lateral Navegadora */}
-        <aside className="modulos-sidebar" aria-label="Navegador de Módulos Rápidos">
+        <aside className={`modulos-sidebar ${sidebarMobileAbierto ? 'mobile-open' : ''}`} aria-label="Navegador de Módulos Rápidos">
           {/* Buscador de Módulos */}
           <div className="modulos-search-box">
             <label htmlFor="buscar-modulo" className="sr-only">
