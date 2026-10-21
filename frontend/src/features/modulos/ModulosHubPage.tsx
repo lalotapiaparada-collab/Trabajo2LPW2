@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { usePaginacion } from '../../hooks/usePaginacion';
+import { PaginacionControls } from '../../components/PaginacionControls';
 import { useCanchas, useCrearCancha, useEliminarCancha } from '../canchas/useCanchasQuery';
 import { useTiposCancha, useCrearTipoCancha, useEliminarTipoCancha } from '../tipos-cancha/useTiposCanchaQuery';
 import {
@@ -311,6 +313,21 @@ export const ModulosHubPage: React.FC = () => {
       return true;
     });
   }, [canchasQuery.data, canchasBusqueda, canchasFiltroSede, canchasFiltroTipo, canchasFiltroEstado]);
+
+  // ─── Paginación por módulo (10 ítems por defecto) ─────────────────────────
+  const pagCanchas       = usePaginacion(canchasFiltradas, 10);
+  const pagTipos         = usePaginacion(tiposQuery.data ?? [], 10);
+  const pagSedes         = usePaginacion(sedesQuery.data ?? [], 10);
+  const pagReservas      = usePaginacion(reservasQuery.data ?? [], 10);
+  const pagPagos         = usePaginacion(pagosQuery.data ?? [], 10);
+  const pagComprobantes  = usePaginacion(comprobantesQuery.data ?? [], 10);
+  const pagHorarios      = usePaginacion(horariosQuery.data ?? [], 10);
+  const pagMantenimientos = usePaginacion(mantenimientosQuery.data ?? [], 10);
+  const pagResenas       = usePaginacion(resenasQuery.data ?? [], 10);
+  const pagNotificaciones = usePaginacion(notificacionesQuery.data ?? [], 10);
+  const pagTrabajadores  = usePaginacion(trabajadoresQuery.data ?? [], 10);
+  const pagUsuarios      = usePaginacion(usuariosQuery.data ?? [], 10);
+  // ──────────────────────────────────────────────────────────────────────────
 
   // Manejadores de creación (POST)
   const handleCrearCancha = async (e: React.FormEvent) => {
@@ -1099,7 +1116,7 @@ export const ModulosHubPage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {canchasFiltradas.map((c) => (
+                        {pagCanchas.datosPagina.map((c) => (
                           <tr key={c.id}>
                             <td className="font-mono text-muted">#{c.id}</td>
                             <td className="font-bold">Cancha {c.numero}</td>
@@ -1137,6 +1154,7 @@ export const ModulosHubPage: React.FC = () => {
                         ))}
                       </tbody>
                     </table>
+                    <PaginacionControls {...pagCanchas} etiqueta="Canchas" />
                   </div>
                 )}
               </section>
@@ -1234,7 +1252,7 @@ export const ModulosHubPage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {tiposQuery.data.map((t) => (
+                        {pagTipos.datosPagina.map((t) => (
                           <tr key={t.id}>
                             <td className="font-mono text-muted">#{t.id}</td>
                             <td className="font-bold">{t.nombre}</td>
@@ -1256,6 +1274,7 @@ export const ModulosHubPage: React.FC = () => {
                         ))}
                       </tbody>
                     </table>
+                    <PaginacionControls {...pagTipos} etiqueta="Tipos de Cancha" />
                   </div>
                 )}
               </section>
@@ -1332,7 +1351,7 @@ export const ModulosHubPage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {sedesQuery.data.map((sede) => (
+                        {pagSedes.datosPagina.map((sede) => (
                           <tr key={sede.id}>
                             <td className="font-mono text-muted">#{sede.id}</td>
                             <td className="font-bold">{sede.nombre}</td>
@@ -1354,6 +1373,7 @@ export const ModulosHubPage: React.FC = () => {
                         ))}
                       </tbody>
                     </table>
+                    <PaginacionControls {...pagSedes} etiqueta="Sedes" />
                   </div>
                 )}
               </section>
@@ -1436,7 +1456,7 @@ export const ModulosHubPage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {reservasQuery.data.map((r) => (
+                        {pagReservas.datosPagina.map((r) => (
                           <tr key={r.id}>
                             <td className="font-mono text-muted">#{r.id}</td>
                             <td className="font-bold">Cancha {r.canchaNumero || r.canchaId}</td>
@@ -1458,6 +1478,7 @@ export const ModulosHubPage: React.FC = () => {
                         ))}
                       </tbody>
                     </table>
+                    <PaginacionControls {...pagReservas} etiqueta="Reservas" />
                   </div>
                 )}
               </section>
@@ -1545,7 +1566,7 @@ export const ModulosHubPage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {pagosQuery.data.map((p) => (
+                        {pagPagos.datosPagina.map((p) => (
                           <tr key={p.id}>
                             <td className="font-mono text-muted">#{p.id}</td>
                             <td>Reserva #{p.reservaId}</td>
@@ -1570,6 +1591,7 @@ export const ModulosHubPage: React.FC = () => {
                         ))}
                       </tbody>
                     </table>
+                    <PaginacionControls {...pagPagos} etiqueta="Pagos" />
                   </div>
                 )}
               </section>
@@ -1657,7 +1679,7 @@ export const ModulosHubPage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {comprobantesQuery.data.map((c) => (
+                        {pagComprobantes.datosPagina.map((c) => (
                           <tr key={c.id}>
                             <td className="font-mono text-muted">#{c.id}</td>
                             <td className="font-bold">{c.numeroComprobante}</td>
@@ -1681,6 +1703,7 @@ export const ModulosHubPage: React.FC = () => {
                         ))}
                       </tbody>
                     </table>
+                    <PaginacionControls {...pagComprobantes} etiqueta="Comprobantes" />
                   </div>
                 )}
               </section>
@@ -1774,7 +1797,7 @@ export const ModulosHubPage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {horariosQuery.data.map((h) => (
+                        {pagHorarios.datosPagina.map((h) => (
                           <tr key={h.id}>
                             <td className="font-mono text-muted">#{h.id}</td>
                             <td className="font-bold">Cancha {h.canchaNumero || h.canchaId}</td>
@@ -1797,6 +1820,7 @@ export const ModulosHubPage: React.FC = () => {
                         ))}
                       </tbody>
                     </table>
+                    <PaginacionControls {...pagHorarios} etiqueta="Horarios" />
                   </div>
                 )}
               </section>
@@ -1895,7 +1919,7 @@ export const ModulosHubPage: React.FC = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {mantenimientosQuery.data.map((m) => (
+                            {pagMantenimientos.datosPagina.map((m) => (
                               <tr key={m.id}>
                                 <td className="font-mono text-muted">#{m.id}</td>
                                 <td className="font-bold">Cancha {m.canchaNumero || m.canchaId}</td>
@@ -1919,6 +1943,7 @@ export const ModulosHubPage: React.FC = () => {
                             ))}
                           </tbody>
                         </table>
+                        <PaginacionControls {...pagMantenimientos} etiqueta="Mantenimientos" />
                       </div>
                     )}
                   </>
@@ -1994,7 +2019,7 @@ export const ModulosHubPage: React.FC = () => {
                 )}
                 {resenasQuery.data && resenasQuery.data.length > 0 && (
                   <div className="cards-grid">
-                    {resenasQuery.data.map((r) => (
+                    {pagResenas.datosPagina.map((r) => (
                       <article key={r.id} className="cancha-card">
                         <header className="card-header">
                           <div>
@@ -2024,6 +2049,9 @@ export const ModulosHubPage: React.FC = () => {
                       </article>
                     ))}
                   </div>
+                )}
+                {resenasQuery.data && resenasQuery.data.length > 0 && (
+                  <PaginacionControls {...pagResenas} etiqueta="Reseñas" />
                 )}
               </section>
             )}
@@ -2086,7 +2114,7 @@ export const ModulosHubPage: React.FC = () => {
                 )}
                 {notificacionesQuery.data && notificacionesQuery.data.length > 0 && (
                   <div className="notifications-list">
-                    {notificacionesQuery.data.map((n) => (
+                    {pagNotificaciones.datosPagina.map((n) => (
                       <div key={n.id} className={`notification-item ${n.leido ? 'read' : 'unread'}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div className="notification-content">
                           <p className="notification-message">{n.mensaje}</p>
@@ -2108,6 +2136,9 @@ export const ModulosHubPage: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                )}
+                {notificacionesQuery.data && notificacionesQuery.data.length > 0 && (
+                  <PaginacionControls {...pagNotificaciones} etiqueta="Notificaciones" />
                 )}
               </section>
             )}
@@ -2197,7 +2228,7 @@ export const ModulosHubPage: React.FC = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {trabajadoresQuery.data.map((t) => {
+                            {pagTrabajadores.datosPagina.map((t) => {
                               const nombreMostrar = t.usuarioNombre || t.nombre || `Personal #${t.id}`;
                               const emailMostrar = t.usuarioEmail || t.email || '—';
                               return (
@@ -2222,6 +2253,7 @@ export const ModulosHubPage: React.FC = () => {
                             })}
                           </tbody>
                         </table>
+                        <PaginacionControls {...pagTrabajadores} etiqueta="Trabajadores" />
                       </div>
                     )}
                   </>
@@ -2313,7 +2345,7 @@ export const ModulosHubPage: React.FC = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {usuariosQuery.data.map((u) => (
+                            {pagUsuarios.datosPagina.map((u) => (
                               <tr key={u.id}>
                                 <td className="font-mono text-muted">#{u.id}</td>
                                 <td className="font-bold">{u.nombre}</td>
@@ -2334,6 +2366,7 @@ export const ModulosHubPage: React.FC = () => {
                             ))}
                           </tbody>
                         </table>
+                        <PaginacionControls {...pagUsuarios} etiqueta="Usuarios" />
                       </div>
                     )}
                   </>
