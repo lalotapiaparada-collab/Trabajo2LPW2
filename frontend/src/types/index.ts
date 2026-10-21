@@ -100,3 +100,99 @@ export interface ApiError {
   message: string;
   fieldErrors?: Record<string, string[]>;
 }
+
+
+// --- ESQUEMAS Y TIPOS DE TODOS LOS MÓDULOS DEL SISTEMA ---
+
+export const ReservaResponseSchema = z.object({
+  id: z.number(),
+  usuarioId: z.number(),
+  usuarioNombre: z.string().optional().nullable(),
+  usuarioEmail: z.string().optional().nullable(),
+  canchaId: z.number(),
+  canchaNumero: z.number().optional().nullable(),
+  trabajadorId: z.number().optional().nullable(),
+  trabajadorNombre: z.string().optional().nullable(),
+  fechaInicio: z.string(),
+  fechaFin: z.string(),
+  estado: z.string(),
+});
+export type ReservaResponse = z.infer<typeof ReservaResponseSchema>;
+
+export const PagoResponseSchema = z.object({
+  id: z.number(),
+  reservaId: z.number(),
+  usuarioId: z.number().optional().nullable(),
+  usuarioNombre: z.string().optional().nullable(),
+  monto: z.number(),
+  metodoPago: z.string(),
+  estado: z.string(),
+  fechaPago: z.string().optional().nullable(),
+});
+export type PagoResponse = z.infer<typeof PagoResponseSchema>;
+
+export const ComprobanteResponseSchema = z.object({
+  id: z.number(),
+  pagoId: z.number(),
+  reservaId: z.number().optional().nullable(),
+  usuarioNombre: z.string().optional().nullable(),
+  numeroComprobante: z.string(),
+  tipo: z.string(),
+  monto: z.number().optional().nullable(),
+  fechaEmision: z.string(),
+});
+export type ComprobanteResponse = z.infer<typeof ComprobanteResponseSchema>;
+
+export const MantenimientoResponseSchema = z.object({
+  id: z.number(),
+  canchaId: z.number(),
+  canchaNumero: z.number().optional().nullable(),
+  trabajadorId: z.number(),
+  trabajadorNombre: z.string().optional().nullable(),
+  descripcion: z.string(),
+  fechaInicio: z.string(),
+  fechaFin: z.string().optional().nullable(),
+});
+export type MantenimientoResponse = z.infer<typeof MantenimientoResponseSchema>;
+
+export const ResenaResponseSchema = z.object({
+  id: z.number(),
+  reservaId: z.number(),
+  usuarioId: z.number(),
+  usuarioNombre: z.string().optional().nullable(),
+  canchaId: z.number().optional().nullable(),
+  canchaNumero: z.number().optional().nullable(),
+  calificacion: z.number(),
+  comentario: z.string().optional().nullable(),
+  fecha: z.string(),
+});
+export type ResenaResponse = z.infer<typeof ResenaResponseSchema>;
+
+export const NotificacionResponseSchema = z.object({
+  id: z.number(),
+  usuarioId: z.number(),
+  mensaje: z.string(),
+  leido: z.boolean(),
+  fechaEnvio: z.string(),
+});
+export type NotificacionResponse = z.infer<typeof NotificacionResponseSchema>;
+
+export const TrabajadorResponseSchema = z.object({
+  id: z.number(),
+  usuarioId: z.number(),
+  nombre: z.string().optional().nullable(),
+  email: z.string().optional().nullable(),
+  cargo: z.string(),
+  turno: z.string(),
+});
+export type TrabajadorResponse = z.infer<typeof TrabajadorResponseSchema>;
+
+export const HorarioResponseSchema = z.object({
+  id: z.number(),
+  canchaId: z.number(),
+  canchaNumero: z.number().optional().nullable(),
+  diaSemana: z.number(),
+  horaApertura: z.string(),
+  horaCierre: z.string(),
+});
+export type HorarioResponse = z.infer<typeof HorarioResponseSchema>;

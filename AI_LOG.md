@@ -192,3 +192,19 @@
 - **Corregido:** Se garantizó que los campos informativos en formularios utilicen `aria-live="polite"` y no interfieran con los payloads enviados al backend.
 - **Descartado:** No se alteró el backend ni se rompieron los contratos de API ni los tests existentes.
 - **Comprendido y explicable:** Sí.
+
+---
+
+## Entrada 14 – Integración y visualización de todos los módulos de la API en el Frontend
+- **Fecha/hora:** 2026-10-20 20:55
+- **Prompt usado:** bueno necesito que esten todos aun que en la rubrica no los solicite todos
+- **Resultado:** Implementación del **Centro de Gestión Integral (`ModulosHubPage.tsx`)** en la ruta protegida `/modulos` y enlace directo en la barra de navegación del `Layout.tsx`, permitiendo consultar e interactuar con la totalidad de los 12 recursos expuestos por la API RESTful:
+  1. **Tipos y DTOs (`types/index.ts`):** Esquemas Zod para `ReservaResponse`, `PagoResponse`, `ComprobanteResponse`, `MantenimientoResponse`, `ResenaResponse`, `NotificacionResponse`, `TrabajadorResponse`, `UsuarioResponse` y `HorarioResponse`.
+  2. **Capa de Servicios (`services/modulosService.ts`):** Métodos de consumo HTTP centralizado con `httpClient` para todos los endpoints (`/api/v1/sedes`, `/api/v1/reservas`, `/api/v1/pagos`, `/api/v1/comprobantes`, `/api/v1/mantenimientos`, `/api/v1/resenas`, `/api/v1/notificaciones`, `/api/v1/trabajadores`, `/api/v1/usuarios`, `/api/v1/horarios`).
+  3. **Manejo de Estado Asíncrono (`useModulosQuery.ts`):** Hooks reactivos con TanStack Query con caché independiente para cada entidad.
+  4. **Interfaz Accesible y Responsiva (`ModulosHubPage.tsx`):** Navegación por pestañas accesibles (`role="tab"`, `aria-selected`, `aria-controls`), estados de carga (`spinner`), estados vacíos informativos y tablas de datos/tarjetas responsivas.
+  5. **Control de Acceso (RBAC):** Las pestañas y endpoints restringidos a `Administrador` (Trabajadores y Usuarios) se condicionan a dicho rol.
+- **Aceptado:** Integración armónica en el layout existente sin romper la arquitectura previa ni afectar las pruebas existentes.
+- **Corregido:** Se aseguraron contrastes y estilos responsivos en la lista de notificaciones y tarjetas de horarios.
+- **Descartado:** No se requirieron modificaciones en el backend puesto que todos los endpoints ya se encontraban implementados.
+- **Comprendido y explicable:** Sí.

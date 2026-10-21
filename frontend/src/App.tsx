@@ -13,6 +13,7 @@ import { CanchasListPage } from './features/canchas/CanchasListPage';
 import { CanchaDetailPage } from './features/canchas/CanchaDetailPage';
 import { CanchaFormPage } from './features/canchas/CanchaFormPage';
 import { TiposCanchaPage } from './features/tipos-cancha/TiposCanchaPage';
+import { ModulosHubPage } from './features/modulos/ModulosHubPage';
 
 import { RouteAccessibilityAnnouncer } from './components/RouteAccessibilityAnnouncer';
 
@@ -42,6 +43,9 @@ export const App: React.FC = () => {
                 {/* Listado de Canchas (Vista principal para todos los usuarios autenticados) */}
                 <Route path="/" element={<CanchasListPage />} />
                 <Route path="/canchas/:id" element={<CanchaDetailPage />} />
+
+                {/* Centro integral de todos los módulos del sistema */}
+                <Route path="/modulos" element={<ModulosHubPage />} />
 
                 {/* Rutas de gestión restringidas a Trabajador y Administrador */}
                 <Route element={<RoleGuard rolesPermitidos={['Trabajador', 'Administrador']} />}>

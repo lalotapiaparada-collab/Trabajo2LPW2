@@ -41,6 +41,12 @@ export const Layout: React.FC = () => {
                 </NavLink>
               </li>
 
+              <li>
+                <NavLink to="/modulos" className={({ isActive }) => (isActive ? 'active' : '')}>
+                  Módulos
+                </NavLink>
+              </li>
+
               {puedeGestionar && (
                 <>
                   <li>
@@ -61,7 +67,9 @@ export const Layout: React.FC = () => {
           <div className="user-menu">
             {usuario && (
               <div className="user-profile">
-                <span className="user-name">{usuario.nombre}</span>
+                <span className="user-name" title={`Usuario: ${usuario.nombre} (${usuario.email})`}>
+                  {usuario.nombre}
+                </span>
                 <span className={`badge badge-${usuario.rol.toLowerCase()}`} title={`Rol: ${usuario.rol}`}>
                   {usuario.rol}
                 </span>
