@@ -1459,3 +1459,16 @@ img, svg, video {
 .modulos-content-area {
   min-width: 0;
 }
+
+/* Wrapper para logo con fondo blanco */
+.brand-crest-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background-color: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  margin-right: 0.5rem;
+}

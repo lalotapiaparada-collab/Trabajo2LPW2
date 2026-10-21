@@ -798,17 +798,30 @@ export const ModulosHubPage: React.FC = () => {
         </div>
       </header>
 
-      {/* KPI Stats Grid */}
+      {/* KPI Stats Grid — 12 módulos */}
       <section className="kpi-stats-grid" aria-label="Indicadores Generales">
+        {/* Fila 1: Instalaciones */}
         <button
           type="button"
           onClick={() => cambiarTab('canchas')}
           className={`kpi-stat-card ${tabActiva === 'canchas' ? 'active' : ''}`}
         >
-          <div className="kpi-icon-wrap">⚽</div>
-          <div className="kpi-data">
-            <span className="kpi-value">{countsMap.canchas}</span>
-            <span className="kpi-label">Canchas</span>
+          <div className="kpi-stat-icon">⚽</div>
+          <div className="kpi-stat-info">
+            <span className="kpi-stat-value">{countsMap.canchas}</span>
+            <span className="kpi-stat-label">Canchas</span>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => cambiarTab('tipos')}
+          className={`kpi-stat-card ${tabActiva === 'tipos' ? 'active' : ''}`}
+        >
+          <div className="kpi-stat-icon">🏷️</div>
+          <div className="kpi-stat-info">
+            <span className="kpi-stat-value">{countsMap.tipos}</span>
+            <span className="kpi-stat-label">Tipos</span>
           </div>
         </button>
 
@@ -817,22 +830,35 @@ export const ModulosHubPage: React.FC = () => {
           onClick={() => cambiarTab('sedes')}
           className={`kpi-stat-card ${tabActiva === 'sedes' ? 'active' : ''}`}
         >
-          <div className="kpi-icon-wrap">🏢</div>
-          <div className="kpi-data">
-            <span className="kpi-value">{countsMap.sedes}</span>
-            <span className="kpi-label">Sedes</span>
+          <div className="kpi-stat-icon">🏢</div>
+          <div className="kpi-stat-info">
+            <span className="kpi-stat-value">{countsMap.sedes}</span>
+            <span className="kpi-stat-label">Sedes</span>
           </div>
         </button>
 
         <button
           type="button"
+          onClick={() => cambiarTab('horarios')}
+          className={`kpi-stat-card ${tabActiva === 'horarios' ? 'active' : ''}`}
+        >
+          <div className="kpi-stat-icon">⏰</div>
+          <div className="kpi-stat-info">
+            <span className="kpi-stat-value">{countsMap.horarios}</span>
+            <span className="kpi-stat-label">Horarios</span>
+          </div>
+        </button>
+
+        {/* Fila 2: Operaciones */}
+        <button
+          type="button"
           onClick={() => cambiarTab('reservas')}
           className={`kpi-stat-card ${tabActiva === 'reservas' ? 'active' : ''}`}
         >
-          <div className="kpi-icon-wrap">📅</div>
-          <div className="kpi-data">
-            <span className="kpi-value">{countsMap.reservas}</span>
-            <span className="kpi-label">Reservas</span>
+          <div className="kpi-stat-icon">📅</div>
+          <div className="kpi-stat-info">
+            <span className="kpi-stat-value">{countsMap.reservas}</span>
+            <span className="kpi-stat-label">Reservas</span>
           </div>
         </button>
 
@@ -841,22 +867,35 @@ export const ModulosHubPage: React.FC = () => {
           onClick={() => cambiarTab('pagos')}
           className={`kpi-stat-card ${tabActiva === 'pagos' ? 'active' : ''}`}
         >
-          <div className="kpi-icon-wrap">💳</div>
-          <div className="kpi-data">
-            <span className="kpi-value">{countsMap.pagos}</span>
-            <span className="kpi-label">Pagos</span>
+          <div className="kpi-stat-icon">💳</div>
+          <div className="kpi-stat-info">
+            <span className="kpi-stat-value">{countsMap.pagos}</span>
+            <span className="kpi-stat-label">Pagos</span>
           </div>
         </button>
 
         <button
           type="button"
+          onClick={() => cambiarTab('comprobantes')}
+          className={`kpi-stat-card ${tabActiva === 'comprobantes' ? 'active' : ''}`}
+        >
+          <div className="kpi-stat-icon">📄</div>
+          <div className="kpi-stat-info">
+            <span className="kpi-stat-value">{countsMap.comprobantes}</span>
+            <span className="kpi-stat-label">Comprobantes</span>
+          </div>
+        </button>
+
+        {/* Fila 3: Servicios */}
+        <button
+          type="button"
           onClick={() => cambiarTab('mantenimientos')}
           className={`kpi-stat-card ${tabActiva === 'mantenimientos' ? 'active' : ''}`}
         >
-          <div className="kpi-icon-wrap">🔧</div>
-          <div className="kpi-data">
-            <span className="kpi-value">{countsMap.mantenimientos}</span>
-            <span className="kpi-label">Mantenimientos</span>
+          <div className="kpi-stat-icon">🔧</div>
+          <div className="kpi-stat-info">
+            <span className="kpi-stat-value">{countsMap.mantenimientos}</span>
+            <span className="kpi-stat-label">Mantenimientos</span>
           </div>
         </button>
 
@@ -865,12 +904,53 @@ export const ModulosHubPage: React.FC = () => {
           onClick={() => cambiarTab('resenas')}
           className={`kpi-stat-card ${tabActiva === 'resenas' ? 'active' : ''}`}
         >
-          <div className="kpi-icon-wrap">⭐</div>
-          <div className="kpi-data">
-            <span className="kpi-value">{countsMap.resenas}</span>
-            <span className="kpi-label">Reseñas</span>
+          <div className="kpi-stat-icon">⭐</div>
+          <div className="kpi-stat-info">
+            <span className="kpi-stat-value">{countsMap.resenas}</span>
+            <span className="kpi-stat-label">Reseñas</span>
           </div>
         </button>
+
+        <button
+          type="button"
+          onClick={() => cambiarTab('notificaciones')}
+          className={`kpi-stat-card ${tabActiva === 'notificaciones' ? 'active' : ''}`}
+        >
+          <div className="kpi-stat-icon">🔔</div>
+          <div className="kpi-stat-info">
+            <span className="kpi-stat-value">{countsMap.notificaciones}</span>
+            <span className="kpi-stat-label">Notificaciones</span>
+          </div>
+        </button>
+
+        {/* Fila 4: Administración (solo admin) */}
+        {esAdmin && (
+          <button
+            type="button"
+            onClick={() => cambiarTab('trabajadores')}
+            className={`kpi-stat-card ${tabActiva === 'trabajadores' ? 'active' : ''}`}
+          >
+            <div className="kpi-stat-icon">👷</div>
+            <div className="kpi-stat-info">
+              <span className="kpi-stat-value">{countsMap.trabajadores}</span>
+              <span className="kpi-stat-label">Trabajadores</span>
+            </div>
+          </button>
+        )}
+
+        {esAdmin && (
+          <button
+            type="button"
+            onClick={() => cambiarTab('usuarios')}
+            className={`kpi-stat-card ${tabActiva === 'usuarios' ? 'active' : ''}`}
+          >
+            <div className="kpi-stat-icon">👥</div>
+            <div className="kpi-stat-info">
+              <span className="kpi-stat-value">{countsMap.usuarios}</span>
+              <span className="kpi-stat-label">Usuarios</span>
+            </div>
+          </button>
+        )}
       </section>
 
       {/* Disposición Ergonómica de Dos Columnas */}

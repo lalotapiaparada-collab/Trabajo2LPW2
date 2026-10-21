@@ -2,7 +2,7 @@
 
 - **Herramienta:** Antigravity
 - **Modelo(s):** Gemini 3.8 Flash (High)
-- **Plan / tipo de cuenta:** (completar: gratuito / de pago / institucional)
+- **Plan / tipo de cuenta:** Gratuito (Cuenta personal)
 - **Período de uso:** 18-10-2026 a 20-10-2026
 
 ---
@@ -294,3 +294,13 @@
 - **Corregido:** Se corrigió el redireccionamiento inicial para evitar vistas intermedias redundantes.
 - **Descartado:** No se requirieron cambios en endpoints backend.
 - **Comprendido y explicable:** Sí.
+
+## Entrada 19 — 2026-10-21
+**Tarea:** Paginación en los 12 módulos del Hub
+**Cambios:**
+- Creado hook `usePaginacion.ts` (genérico, reutilizable, tamaños: 5/10/20/50)
+- Creado componente `PaginacionControls.tsx` (info "Mostrando X–Y de N", selector de filas, navegación de páginas con elipsis)
+- `ModulosHubPage.tsx`: todos los 12 módulos ahora muestran máximo N filas por página con controles de navegación
+- CSS ya existente en `base.css` reutilizado (`.pagination`, `.pagination-info`, `.pagination-buttons`)
+- Corregida ruta de importación en `PaginacionControls.tsx` (`../../hooks/` → `../hooks/`)
+**Resultado:** TypeScript ✅ | ESLint ✅ | Tests 16/16 ✅ | Build ✅

@@ -88,7 +88,9 @@ export const Layout: React.FC = () => {
         <div className="header-container">
           <div className="brand">
             <Link to="/" className="brand-logo" aria-label="Inicio - Sistema Reservas Canchas">
-              <img src={colocoloLogo} alt="Escudo Oficial Colo-Colo" className="brand-crest" />
+              <div className="brand-crest-wrap">
+                <img src={colocoloLogo} alt="Escudo Oficial Colo-Colo" className="brand-crest" />
+              </div>
               <div className="brand-text-container">
                 <span className="brand-text">CanchasYa</span>
                 <span className="brand-badge">CSD COLO-COLO</span>
@@ -96,7 +98,7 @@ export const Layout: React.FC = () => {
             </Link>
           </div>
 
-          <nav className="main-nav" aria-label="Navegación principal">
+          <nav className="main-nav" aria-label="Navegación principal" style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
             <ul>
               {/* Acceso Principal a Módulos Rápidos en Inicio */}
               <li>
@@ -158,9 +160,6 @@ export const Layout: React.FC = () => {
           <div className="user-menu">
             {usuario && (
               <div className="user-profile">
-                <span className="user-name" title={`Usuario: ${usuario.nombre} (${usuario.email})`}>
-                  {usuario.nombre}
-                </span>
                 <span className={`badge badge-${usuario.rol.toLowerCase()}`} title={`Rol: ${usuario.rol}`}>
                   {usuario.rol}
                 </span>
