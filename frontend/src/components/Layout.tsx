@@ -14,24 +14,24 @@ interface ModuloQuickLink {
 
 const MODULOS_SISTEMA: ModuloQuickLink[] = [
   // Instalaciones
-  { id: 'canchas', nombre: 'Canchas', icono: '⚽', ruta: '/modulos?tab=canchas', categoria: 'Instalaciones' },
-  { id: 'tipos', nombre: 'Tipos de Cancha', icono: '🏷️', ruta: '/modulos?tab=tipos', categoria: 'Instalaciones' },
-  { id: 'sedes', nombre: 'Sedes', icono: '🏢', ruta: '/modulos?tab=sedes', categoria: 'Instalaciones' },
-  { id: 'horarios', nombre: 'Horarios', icono: '⏰', ruta: '/modulos?tab=horarios', categoria: 'Instalaciones' },
+  { id: 'canchas', nombre: 'Canchas', icono: '⚽', ruta: '/?tab=canchas', categoria: 'Instalaciones' },
+  { id: 'tipos', nombre: 'Tipos de Cancha', icono: '🏷️', ruta: '/?tab=tipos', categoria: 'Instalaciones' },
+  { id: 'sedes', nombre: 'Sedes', icono: '🏢', ruta: '/?tab=sedes', categoria: 'Instalaciones' },
+  { id: 'horarios', nombre: 'Horarios', icono: '⏰', ruta: '/?tab=horarios', categoria: 'Instalaciones' },
 
   // Operaciones
-  { id: 'reservas', nombre: 'Reservas', icono: '📅', ruta: '/modulos?tab=reservas', categoria: 'Operaciones' },
-  { id: 'pagos', nombre: 'Pagos', icono: '💳', ruta: '/modulos?tab=pagos', categoria: 'Operaciones' },
-  { id: 'comprobantes', nombre: 'Comprobantes', icono: '📄', ruta: '/modulos?tab=comprobantes', categoria: 'Operaciones' },
+  { id: 'reservas', nombre: 'Reservas', icono: '📅', ruta: '/?tab=reservas', categoria: 'Operaciones' },
+  { id: 'pagos', nombre: 'Pagos', icono: '💳', ruta: '/?tab=pagos', categoria: 'Operaciones' },
+  { id: 'comprobantes', nombre: 'Comprobantes', icono: '📄', ruta: '/?tab=comprobantes', categoria: 'Operaciones' },
 
   // Servicios
-  { id: 'mantenimientos', nombre: 'Mantenimientos', icono: '🔧', ruta: '/modulos?tab=mantenimientos', categoria: 'Servicios' },
-  { id: 'resenas', nombre: 'Reseñas', icono: '⭐', ruta: '/modulos?tab=resenas', categoria: 'Servicios' },
-  { id: 'notificaciones', nombre: 'Notificaciones', icono: '🔔', ruta: '/modulos?tab=notificaciones', categoria: 'Servicios' },
+  { id: 'mantenimientos', nombre: 'Mantenimientos', icono: '🔧', ruta: '/?tab=mantenimientos', categoria: 'Servicios' },
+  { id: 'resenas', nombre: 'Reseñas', icono: '⭐', ruta: '/?tab=resenas', categoria: 'Servicios' },
+  { id: 'notificaciones', nombre: 'Notificaciones', icono: '🔔', ruta: '/?tab=notificaciones', categoria: 'Servicios' },
 
   // Administración
-  { id: 'trabajadores', nombre: 'Trabajadores', icono: '👷', ruta: '/modulos?tab=trabajadores', categoria: 'Administración', adminOnly: true },
-  { id: 'usuarios', nombre: 'Usuarios', icono: '👥', ruta: '/modulos?tab=usuarios', categoria: 'Administración', adminOnly: true },
+  { id: 'trabajadores', nombre: 'Trabajadores', icono: '👷', ruta: '/?tab=trabajadores', categoria: 'Administración', adminOnly: true },
+  { id: 'usuarios', nombre: 'Usuarios', icono: '👥', ruta: '/?tab=usuarios', categoria: 'Administración', adminOnly: true },
 ];
 
 export const Layout: React.FC = () => {
@@ -87,7 +87,7 @@ export const Layout: React.FC = () => {
       <header className="app-header">
         <div className="header-container">
           <div className="brand">
-            <Link to="/modulos" className="brand-logo" aria-label="Inicio - Sistema Reservas Canchas">
+            <Link to="/" className="brand-logo" aria-label="Inicio - Sistema Reservas Canchas">
               <img src={colocoloLogo} alt="Escudo Oficial Colo-Colo" className="brand-crest" />
               <div className="brand-text-container">
                 <span className="brand-text">CanchasYa</span>
@@ -98,10 +98,11 @@ export const Layout: React.FC = () => {
 
           <nav className="main-nav" aria-label="Navegación principal">
             <ul>
-              {/* Acceso Principal y Único: Módulos Rápidos */}
+              {/* Acceso Principal a Módulos Rápidos en Inicio */}
               <li>
                 <NavLink
-                  to="/modulos"
+                  to="/"
+                  end
                   className={({ isActive }) => (isActive ? 'active' : '')}
                 >
                   ⚡ Módulos Rápidos

@@ -272,3 +272,25 @@
 - **Corregido:** Se preservaron los accesos de roles (RBAC) y la validación de campos en cada formulario superior.
 - **Descartado:** No se requirieron migraciones en backend.
 - **Comprendido y explicable:** Sí.
+
+---
+
+## Entrada 18 – Ruta Principal Módulos Rápidos y Visualización Integrada de Canchas
+- **Fecha/hora:** 2026-10-20 23:35
+- **Prompt usado:** la pagina de inicio me mustra esto / lo ideal seria que muestre el los moduos rapido
+- **Resultado:** Adaptación de la ruta raíz y perfeccionamiento del flujo de inicio del sistema:
+  1. **Ruta Raíz (`/`) a `ModulosHubPage` (`App.tsx`):** Se modificó la ruta por defecto (`/`) para que apunte directamente al centro integral `ModulosHubPage`, garantizando que al iniciar sesión o ingresar a `https://localhost:5173/` el usuario acceda inmediatamente a los Módulos Rápidos en lugar del listado tradicional aislado.
+  2. **Compatibilidad Retenida:** Se preservaron las rutas específicas `/canchas`, `/canchas/:id` y `/canchas/:id/editar` para mantener compatibilidad con enlaces profundos y formularios dedicados.
+  3. **Enriquecimiento del Módulo de Canchas en el Hub:**
+     - Se integraron filtros avanzados en tiempo real (Sede, Tipo de Cancha, Estado y Búsqueda textual por número).
+     - Se incorporó la tabla completa de canchas con badges de estado y botones de acción rápida (`Ver`, `Editar`, `Eliminar`).
+     - Se mantuvo el formulario de alta reactiva en la parte superior para conservar el patrón homogéneo "Crear Arriba / Listar Abajo".
+  4. **Navegación Unificada en Layout (`Layout.tsx`):** Se actualizaron los enlaces del menú desplegable y accesos rápidos para apuntar a `/?tab=<modulo>`.
+  5. **Verificación Total de Calidad:**
+     - 16 pruebas unitarias y de integración de frontend aprobadas (Vitest).
+     - 19 pruebas de integración de backend aprobadas (.NET).
+     - Build de producción Vite completado exitosamente sin advertencias.
+- **Aceptado:** Sí, navegación directa e intuitiva a los Módulos Rápidos desde la raíz del sitio.
+- **Corregido:** Se corrigió el redireccionamiento inicial para evitar vistas intermedias redundantes.
+- **Descartado:** No se requirieron cambios en endpoints backend.
+- **Comprendido y explicable:** Sí.

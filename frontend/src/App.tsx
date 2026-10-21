@@ -40,12 +40,13 @@ export const App: React.FC = () => {
             {/* Rutas protegidas dentro del Layout semántico */}
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
-                {/* Listado de Canchas (Vista principal para todos los usuarios autenticados) */}
-                <Route path="/" element={<CanchasListPage />} />
-                <Route path="/canchas/:id" element={<CanchaDetailPage />} />
-
-                {/* Centro integral de todos los módulos del sistema */}
+                {/* Página Principal: Módulos Rápidos unificados para todos los usuarios */}
+                <Route path="/" element={<ModulosHubPage />} />
                 <Route path="/modulos" element={<ModulosHubPage />} />
+
+                {/* Catálogo y Ficha de Canchas */}
+                <Route path="/canchas" element={<CanchasListPage />} />
+                <Route path="/canchas/:id" element={<CanchaDetailPage />} />
 
                 {/* Rutas de gestión restringidas a Trabajador y Administrador */}
                 <Route element={<RoleGuard rolesPermitidos={['Trabajador', 'Administrador']} />}>

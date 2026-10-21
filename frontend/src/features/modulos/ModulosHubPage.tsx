@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { useCanchas, useCrearCancha } from '../canchas/useCanchasQuery';
+import { useCanchas, useCrearCancha, useEliminarCancha } from '../canchas/useCanchasQuery';
 import { useTiposCancha, useCrearTipoCancha } from '../tipos-cancha/useTiposCanchaQuery';
 import {
   useSedesList,
@@ -89,6 +89,12 @@ export const ModulosHubPage: React.FC = () => {
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<CategoriaModulo>('todos');
   const [busquedaModulo, setBusquedaModulo] = useState<string>('');
 
+  // Filtros internos de Canchas
+  const [canchasBusqueda, setCanchasBusqueda] = useState<string>('');
+  const [canchasFiltroSede, setCanchasFiltroSede] = useState<string>('');
+  const [canchasFiltroTipo, setCanchasFiltroTipo] = useState<string>('');
+  const [canchasFiltroEstado, setCanchasFiltroEstado] = useState<string>('');
+
   // Queries de datos
   const canchasQuery = useCanchas();
   const tiposQuery = useTiposCancha();
@@ -105,6 +111,7 @@ export const ModulosHubPage: React.FC = () => {
 
   // Mutations
   const crearCanchaMutation = useCrearCancha();
+  const eliminarCanchaMutation = useEliminarCancha();
   const crearTipoMutation = useCrearTipoCancha();
   const crearSedeMutation = useCrearSede();
   const crearReservaMutation = useCrearReserva();
@@ -243,6 +250,27 @@ export const ModulosHubPage: React.FC = () => {
     });
   }, [esAdmin, categoriaSeleccionada, busquedaModulo]);
 
+  // Filtrado de la lista de Canchas
+  const canchasFiltradas = useMemo(() => {
+    const lista = canchasQuery.data ?? [];
+    return lista.filter((c) => {
+      if (canchasFiltroSede && c.sedeId.toString() !== canchasFiltroSede) return false;
+      if (canchasFiltroTipo && c.tipoCanchaId.toString() !== canchasFiltroTipo) return false;
+      if (canchasFiltroEstado && c.estado !== canchasFiltroEstado) return false;
+      if (canchasBusqueda.trim()) {
+        const query = canchasBusqueda.toLowerCase().trim();
+        return (
+          c.id.toString() === query ||
+          c.numero.toString().includes(query) ||
+          c.sedeNombre.toLowerCase().includes(query) ||
+          c.tipoCanchaNombre.toLowerCase().includes(query) ||
+          c.estado.toLowerCase().includes(query)
+        );
+      }
+      return true;
+    });
+  }, [canchasQuery.data, canchasBusqueda, canchasFiltroSede, canchasFiltroTipo, canchasFiltroEstado]);
+
   // Manejadores de creación (POST)
   const handleCrearCancha = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -272,6 +300,16 @@ export const ModulosHubPage: React.FC = () => {
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
       setErrorCancha(errorObj?.message || 'Error al crear la cancha.');
+    }
+  };
+
+  const handleEliminarCancha = async (id: number, numero: number) => {
+    if (window.confirm(`¿Estás seguro de que deseas eliminar la Cancha N° ${numero}?`)) {
+      try {
+        await eliminarCanchaMutation.mutateAsync(id);
+      } catch {
+        alert('Error al intentar eliminar la cancha. Verifica tus permisos.');
+      }
     }
   };
 
@@ -586,7 +624,7 @@ export const ModulosHubPage: React.FC = () => {
       <header className="page-header" style={{ marginBottom: '1.25rem' }}>
         <div>
           <nav aria-label="Ruta de navegación" className="breadcrumb">
-            <Link to="/modulos">Inicio</Link> / <span>Módulos Rápidos</span>
+            <Link to="/">Inicio</Link> / <span>Módulos Rápidos</span>
           </nav>
           <h1>⚡ Módulos Rápidos y Operaciones Deportivas</h1>
           <p className="text-muted">
@@ -773,7 +811,7 @@ export const ModulosHubPage: React.FC = () => {
                 <div className="section-title-bar">
                   <div>
                     <h2>⚽ Canchas Deportivas</h2>
-                    <span className="text-muted text-sm">Registra una cancha en el formulario superior y revisa la lista abajo</span>
+                    <span className="text-muted text-sm">Registra una cancha arriba y filtra o gestiona el catálogo abajo</span>
                   </div>
                 </div>
 
@@ -843,44 +881,135 @@ export const ModulosHubPage: React.FC = () => {
                   </form>
                 )}
 
-                {/* LISTA ABAJO */}
-                <h3 style={{ marginBottom: '1rem', fontSize: 'var(--font-size-md)', borderTop: '1px solid var(--color-border)', paddingTop: '1.25rem' }}>
-                  📋 Lista de Canchas Registradas ({canchasQuery.data?.length ?? 0})
-                </h3>
+                {/* LISTA ABAJO CON FILTROS */}
+                <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '1.25rem', marginBottom: '1.25rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+                    <h3 style={{ margin: 0, fontSize: 'var(--font-size-md)' }}>
+                      📋 Lista de Canchas Registradas ({canchasFiltradas.length})
+                    </h3>
+                  </div>
+
+                  {/* Barra de Filtros de Canchas */}
+                  <div className="filters-card" style={{ marginBottom: '1.25rem', padding: '1rem' }}>
+                    <div className="filters-grid">
+                      <div className="form-group">
+                        <label htmlFor="filtro-cancha-busqueda">Búsqueda rápida</label>
+                        <input
+                          id="filtro-cancha-busqueda"
+                          type="search"
+                          placeholder="Buscar por N°, sede, tipo..."
+                          value={canchasBusqueda}
+                          onChange={(e) => setCanchasBusqueda(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="filtro-cancha-sede">Sede</label>
+                        <select
+                          id="filtro-cancha-sede"
+                          value={canchasFiltroSede}
+                          onChange={(e) => setCanchasFiltroSede(e.target.value)}
+                        >
+                          <option value="">Todas las sedes</option>
+                          {sedesQuery.data?.map((s) => (
+                            <option key={s.id} value={s.id.toString()}>{s.nombre}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="filtro-cancha-tipo">Tipo de Cancha</label>
+                        <select
+                          id="filtro-cancha-tipo"
+                          value={canchasFiltroTipo}
+                          onChange={(e) => setCanchasFiltroTipo(e.target.value)}
+                        >
+                          <option value="">Todos los tipos</option>
+                          {tiposQuery.data?.map((t) => (
+                            <option key={t.id} value={t.id.toString()}>{t.nombre}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="filtro-cancha-estado">Estado</label>
+                        <select
+                          id="filtro-cancha-estado"
+                          value={canchasFiltroEstado}
+                          onChange={(e) => setCanchasFiltroEstado(e.target.value)}
+                        >
+                          <option value="">Todos los estados</option>
+                          <option value="Disponible">Disponible</option>
+                          <option value="Mantenimiento">Mantenimiento</option>
+                          <option value="Fuera de servicio">Fuera de servicio</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 {canchasQuery.isLoading && (
                   <div className="loading-container"><span className="spinner" aria-hidden="true" /><span>Cargando canchas...</span></div>
                 )}
-                {canchasQuery.data && canchasQuery.data.length > 0 && (
-                  <div className="cards-grid">
-                    {canchasQuery.data.map((c) => (
-                      <article key={c.id} className="cancha-card">
-                        <header className="card-header">
-                          <div>
-                            <span className="card-id-tag font-mono">ID #{c.id}</span>
-                            <h3>Cancha N° {c.numero}</h3>
-                          </div>
-                          <span className={`badge badge-${c.estado.toLowerCase().replace(/\s+/g, '-')}`}>
-                            {c.estado}
-                          </span>
-                        </header>
-                        <div className="card-body">
-                          <p>🏟️ <strong>Sede:</strong> {c.sedeNombre}</p>
-                          <p>🏷️ <strong>Tipo:</strong> {c.tipoCanchaNombre}</p>
-                          <p>💰 <strong>Tarifa:</strong> ${c.precioPorHora.toLocaleString('es-CL')} / hora</p>
-                        </div>
-                        <footer className="card-footer" style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
-                          <Link to={`/canchas/${c.id}`} className="btn btn-sm btn-outline" style={{ flex: 1, textAlign: 'center' }}>
-                            Ver Ficha Detallada
-                          </Link>
-                          {puedeGestionar && (
-                            <Link to={`/canchas/${c.id}/editar`} className="btn btn-sm btn-secondary">
-                              Editar
-                            </Link>
-                          )}
-                        </footer>
-                      </article>
-                    ))}
+                {canchasFiltradas.length === 0 && !canchasQuery.isLoading && (
+                  <div className="empty-state">
+                    <span className="empty-icon">⚽</span>
+                    <h3>No se encontraron canchas con los filtros aplicados</h3>
+                  </div>
+                )}
+                {canchasFiltradas.length > 0 && (
+                  <div className="table-responsive">
+                    <table className="data-table" aria-label="Tabla de Canchas">
+                      <thead>
+                        <tr>
+                          <th scope="col">ID</th>
+                          <th scope="col">N°</th>
+                          <th scope="col">Sede</th>
+                          <th scope="col">Tipo</th>
+                          <th scope="col">Precio / Hora</th>
+                          <th scope="col">Estado</th>
+                          <th scope="col">Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {canchasFiltradas.map((c) => (
+                          <tr key={c.id}>
+                            <td className="font-mono text-muted">#{c.id}</td>
+                            <td className="font-bold">Cancha {c.numero}</td>
+                            <td>{c.sedeNombre}</td>
+                            <td>{c.tipoCanchaNombre}</td>
+                            <td className="font-bold">${c.precioPorHora.toLocaleString('es-CL')}</td>
+                            <td>
+                              <span className={`badge badge-${c.estado.toLowerCase().replace(/\s+/g, '-')}`}>
+                                {c.estado}
+                              </span>
+                            </td>
+                            <td>
+                              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                                <Link to={`/canchas/${c.id}`} className="btn btn-outline btn-sm">
+                                  Ver
+                                </Link>
+                                {puedeGestionar && (
+                                  <>
+                                    <Link to={`/canchas/${c.id}/editar`} className="btn btn-secondary btn-sm">
+                                      Editar
+                                    </Link>
+                                    <button
+                                      type="button"
+                                      className="btn btn-danger btn-sm"
+                                      onClick={() => handleEliminarCancha(c.id, c.numero)}
+                                      disabled={eliminarCanchaMutation.isPending}
+                                    >
+                                      Eliminar
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </section>
@@ -1647,7 +1776,7 @@ export const ModulosHubPage: React.FC = () => {
                   {exitoTrabajador && <div className="alert alert-success" role="alert" style={{ marginBottom: '1rem' }}>{exitoTrabajador}</div>}
                   <div className="filters-grid" style={{ marginBottom: '1rem' }}>
                     <div className="form-group">
-                      <label htmlFor="trab-usuario">Usuario a Promover *</label>
+                      <label htmlFor="trab-usuario">Usuario *</label>
                       <select id="trab-usuario" value={trabajadorUsuarioId || (usuariosQuery.data?.[0]?.id ?? 0)} onChange={(e) => setTrabajadorUsuarioId(Number(e.target.value))}>
                         {usuariosQuery.data?.map((u) => (
                           <option key={u.id} value={u.id}>{u.nombre} ({u.email}) [{u.rol}]</option>
